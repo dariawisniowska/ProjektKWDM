@@ -4,9 +4,381 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EyeStation"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="EyeStation"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
         
+        MinHeight="600"
+        MinWidth="800"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        FontFamily="{DynamicResource MaterialDesignFont}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.ColumnSpan="2" Background="#05fce5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Background="{x:Null}">
+                <ToggleButton
+                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                    IsChecked="False"
+                    ToolTip="Dodaj znacznik"
+                    Margin="5,0,5,0"
+                    x:Name="btnAddMarker"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth2" 
+                    IsEnabled="False" 
+                    Checked="btnAddMarker_Checked"
+                    Unchecked="btnAddMarker_Unchecked">
+                    <ToggleButton.Content>
+                        <materialDesign:PackIcon
+                            Kind="AddLocation"
+                            Height="20"
+                            Width="20" />
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+                <ToggleButton
+                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                    IsChecked="False"
+                    ToolTip="Odznacz"
+                    Margin="5,0,5,0"
+                    x:Name="btnUnSelect"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth2" 
+                    IsEnabled="False" 
+                    Checked="btnUnSelect_Checked"
+                    Unchecked="btnUnSelect_Unchecked">
+                    <ToggleButton.Content>
+                        <materialDesign:PackIcon
+                            Kind="EditOff"
+                            Height="20"
+                            Width="20" />
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+                <ToggleButton
+                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                    IsChecked="False"
+                    ToolTip="Zaznacz"
+                    Margin="5,0,5,0"
+                    x:Name="btnSelect"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth2" 
+                    IsEnabled="False" 
+                    Checked="btnSelect_Checked"
+                    Unchecked="btnSelect_Unchecked">
+                    <ToggleButton.Content>
+                        <materialDesign:PackIcon
+                            Kind="Edit"
+                            Height="20"
+                            Width="20" />
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+                <ToggleButton
+                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                    IsChecked="False"
+                    ToolTip="Zmierz kąt"
+                    Margin="5,0,5,0"
+                    x:Name="btnAngle"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth2" 
+                    IsEnabled="False" 
+                    Checked="btnAngle_Checked"
+                    Unchecked="btnAngle_Unchecked">
+                    <ToggleButton.Content>
+                        <materialDesign:PackIcon
+                            Kind="AngleAcute"
+                            Height="20"
+                            Width="20" />
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+                <ToggleButton
+                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                    IsChecked="False"
+                    ToolTip="Zmierz długość"
+                    Margin="5,0,5,0"
+                    x:Name="btnMeasure"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth2" 
+                    IsEnabled="False" 
+                    Checked="btnMeasure_Checked" 
+                    Unchecked="btnMeasure_Unchecked">
+                    <ToggleButton.Content>
+                        <materialDesign:PackIcon
+                            Kind="ArrowExpandHorizontal"
+                            Height="20"
+                            Width="20" />
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+                <Button 
+                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" 
+                    ToolTip="Zmień widok"
+                    Margin="10,0,10,0"
+                    x:Name="btnFourImage"
+                    Click="btnFourImage_Click">
+                    <materialDesign:PackIcon
+                        Kind="BorderAll"
+                        Height="24"
+                        Width="24" />
+                </Button>
+
+                <Button 
+                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" 
+                    ToolTip="Zmień widok"
+                    Margin="10,0,10,0"
+                    x:Name="btnOneImage"
+                    Visibility="Collapsed"
+                    Click="btnOneImage_Click">
+                    <materialDesign:PackIcon
+                        Kind="BorderAllVariant"
+                        Height="24"
+                        Width="24" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <StackPanel>
+                <Button
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Width="270"
+                    Height="40"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                    Margin="0 20 0 0"
+                    x:Name="btnGetImage" Click="btnGetImage_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <materialDesign:PackIcon
+                            Kind="FeatureSearchOutline"
+                            Height="24"
+                            Width="24" />
+                        <Label Foreground="#000000">Wybierz badanie</Label>
+                    </StackPanel>
+                </Button>
+
+                <Button
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Width="270"
+                    Height="40"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                    Margin="0 20 0 0"
+                    x:Name="btnAddImage" Click="btnAddImage_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <materialDesign:PackIcon
+                            Kind="ImagePlus"
+                            Height="24"
+                            Width="24" />
+                        <Label Foreground="#000000">Wczytaj nowy obraz</Label>
+                    </StackPanel>
+                </Button>
+
+                <Button
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Width="270"
+                    Height="40"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                    Margin="0 20 0 0"
+                    x:Name="btnSaveImage"
+                    IsEnabled="False" Click="btnSaveImage_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <materialDesign:PackIcon
+                            Kind="ContentSaveOutline"
+                            Height="24"
+                            Width="24" />
+                        <Label Foreground="#000000">Zapisz jako .png</Label>
+                    </StackPanel>
+                </Button>
+
+                <Button
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Width="270"
+                    Height="40"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                    Margin="0 20 0 0"
+                    x:Name="btnSegmentation"
+                    IsEnabled="False" Click="btnSegmentation_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <materialDesign:PackIcon
+                            Kind="VectorPolyline"
+                            Height="24"
+                            Width="24" />
+                        <Label Foreground="#000000">Segmentuj naczynia krwionośne</Label>
+                    </StackPanel>
+                </Button>
+
+                <Button
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Width="270"
+                    Height="40"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                    Margin="0 20 0 0"
+                    x:Name="btnAnalysis"
+                    IsEnabled="False" Click="btnAnalysis_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <materialDesign:PackIcon
+                            Kind="ChartBar"
+                            Height="24"
+                            Width="24" />
+                        <Label Foreground="#000000">Analizuj pod kątem retinopatii</Label>
+                    </StackPanel>
+                </Button>
+
+                <Button
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Width="270"
+                    Height="40"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                    Margin="0 20 0 0"
+                    x:Name="btnDesription"
+                    IsEnabled="False" Click="btnDesription_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <materialDesign:PackIcon
+                            Kind="SquareEditOutline"
+                            Height="24"
+                            Width="24" />
+                        <Label Foreground="#000000">Edytuj opis badania</Label>
+                    </StackPanel>
+                </Button>
+
+                <Button
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Width="270"
+                    Height="40"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                    Margin="0 20 0 0"
+                    x:Name="btnReport"
+                    IsEnabled="False" Click="btnReport_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <materialDesign:PackIcon
+                            Kind="FileChart"
+                            Height="24"
+                            Width="24" />
+                        <Label Foreground="#000000">Generuj raport</Label>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid x:Name="mainPanel" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Margin="10 0 20 0" Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Slider
+                        Grid.Column="0"
+                        TickFrequency="5"
+                        Orientation="Horizontal"
+                        Minimum="1"
+                        Maximum="50"
+                        Value="25"
+                        ToolTip="Jasność" 
+                        Name="slBright"
+                        Margin="0 15 10 0">
+                    </Slider>
+                    <Slider
+                        Grid.Column="1"
+                        TickFrequency="5"
+                        Orientation="Horizontal"
+                        Minimum="1"
+                        Maximum="50"
+                        Value="25"
+                        ToolTip="Kontrast" 
+                        Name="slContrast"
+                        Margin="10 15 0 0">
+                    </Slider>
+                </Grid>
+                <Grid Grid.Row="1" x:Name="gridOneImage" Visibility="Visible" Margin = "10 0 20 20">
+                    <Image VerticalAlignment = "Top" 
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="Fant"
+                           Grid.Row="0"
+                           x:Name="imgBig"/>
+                </Grid>
+                <Grid Grid.Row="1" x:Name="gridFourImage" Visibility="Collapsed" Margin = "10 20 20 20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Image VerticalAlignment = "Top" 
+                           Margin = "0 0 10 10" 
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="Fant"
+                           Grid.Row="0"
+                           Grid.Column="0"
+                           x:Name="imgSmall"/>
+                        <Image VerticalAlignment = "Top" 
+                           Margin = "10 0 0 10" 
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="Fant"
+                           Grid.Row="0"
+                           Grid.Column="1"
+                           x:Name="imgGreen"/>
+                        <Image VerticalAlignment = "Top" 
+                           Margin = "0 10 10 0" 
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="Fant"
+                           Grid.Row="1"
+                           Grid.Column="0"
+                           x:Name="imgMask"/>
+                        <Image VerticalAlignment = "Top" 
+                           Margin = "10 10 0 0" 
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="Fant"
+                           Grid.Row="1"
+                           Grid.Column="1"
+                           x:Name="imgMaskAndImage"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid x:Name="selectStudyPanel" Visibility="Collapsed">
+                <Grid Margin="10 0 20 0" Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ScrollViewer 
+                        VerticalScrollBarVisibility="Auto" 
+                        Grid.Column="0" 
+                        x:Name="svSelectStydyPanel"
+                        PreviewMouseWheel="svSelectStydyPanel_PreviewMouseWheel">
+                        <ListView
+                            ItemsSource="{Binding Study}" x:Name="lvStudy" 
+                            SelectionChanged="lvStudy_SelectionChanged">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn
+                                        DisplayMemberBinding="{Binding Id}"
+                                        Header="Id" />
+                                    <GridViewColumn
+                                        DisplayMemberBinding="{Binding Name}"
+                                        Header="Imię i nazwisko" />
+                                    <GridViewColumn
+                                        DisplayMemberBinding="{Binding Description}"
+                                        Header="Opis" />
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>
+
+        
