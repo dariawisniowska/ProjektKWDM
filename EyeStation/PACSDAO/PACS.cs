@@ -1,4 +1,4 @@
-﻿using EyeStation.PACS;
+﻿using EyeStation.PACSDAO;
 using gdcm;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace EyeStation
+namespace EyeStation.PACSDAO
 {
     public class PACSObj
     {
@@ -40,18 +40,18 @@ namespace EyeStation
             }
         }
 
-        public List<PACS.Patient> GetData()
+        public List<PACSDAO.Patient> GetData()
         {
-            List<PACS.Patient> data = new List<EyeStation.PACS.Patient>();
+            List<PACSDAO.Patient> data = new List<EyeStation.PACSDAO.Patient>();
             gdcm.DataSetArrayType wynik = PatientQuery();
             // pokaż wyniki
             foreach (gdcm.DataSet x in wynik)
             {
-                EyeStation.PACS.PatientDataReader de = new EyeStation.PACS.PatientDataReader(x.toString());
+                EyeStation.PACSDAO.PatientDataReader de = new EyeStation.PACSDAO.PatientDataReader(x.toString());
                                 
                 FramesQuery(de.PatientID);
 
-                data.Add(new PACS.Patient(de.PatientID, de.PatientName, ImageNames, Images, dane, Datas));
+                data.Add(new PACSDAO.Patient(de.PatientID, de.PatientName, ImageNames, Images, dane, Datas));
             }
             return data;
         }
@@ -146,9 +146,9 @@ namespace EyeStation
 
 
                 // przekonwertuj na "znany format"
-                gdcm.Bitmap bmjpeg2000 = PACS.ImageConverter.pxmap2jpeg2000(reader.GetPixmap());
+                gdcm.Bitmap bmjpeg2000 = PACSDAO.ImageConverter.pxmap2jpeg2000(reader.GetPixmap());
                 // przekonwertuj na .NET bitmapy
-                System.Drawing.Bitmap[] X = PACS.ImageConverter.gdcmBitmap2Bitmap(bmjpeg2000);
+                System.Drawing.Bitmap[] X = PACSDAO.ImageConverter.gdcmBitmap2Bitmap(bmjpeg2000);
 
                 // zapisz
                 for (int i = 0; i < X.Length; i++)

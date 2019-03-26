@@ -89,6 +89,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\Study.cs" />
+    <Compile Include="PACSDAO\ImageConverter.cs" />
+    <Compile Include="PACSDAO\PACS.cs" />
+    <Compile Include="PACSDAO\Patient.cs" />
     <Compile Include="VesselSegmentatorFilter\BitmapWriter.cs" />
     <Compile Include="VesselSegmentatorFilter\CanalType.cs" />
     <Compile Include="VesselSegmentatorFilter\PointsPair.cs" />

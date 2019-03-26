@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EyeStation.PACS
+namespace EyeStation.PACSDAO
 {
     public static class ImageConverter
     {
