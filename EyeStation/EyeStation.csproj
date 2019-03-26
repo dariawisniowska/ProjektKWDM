@@ -90,6 +90,8 @@
     <Compile Include="VesselSegmentatorFilter\BitmapWriter.cs" />
     <Compile Include="VesselSegmentatorFilter\CanalType.cs" />
     <Compile Include="VesselSegmentatorFilter\PointsPair.cs" />
+    <Compile Include="VesselSegmentatorFilter\SVMFeatures.cs" />
+    <Compile Include="VesselSegmentatorFilter\VesselSegmentatioMethod.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentator.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
