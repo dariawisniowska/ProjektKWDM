@@ -55,9 +55,12 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SimpleITKCSharpManaged, Version=1.2.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="gdcm-sharp, Version=2.2.0.0, Culture=neutral, PublicKeyToken=aa55076f0ca26f2f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\x64\Debug\SimpleITKCSharpManaged.dll</HintPath>
+      <HintPath>bin\Debug\gdcm-sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="SimpleITKCSharpManaged, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\SimpleITK-win32-CSharp-x86.1.0.0.1\lib\SimpleITKCSharpManaged.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -80,6 +83,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="PACS\ImageConverter.cs" />
+    <Compile Include="PACS\PACS.cs" />
+    <Compile Include="PACS\Patient.cs" />
     <Compile Include="VesselSegmentatorFilter\BitmapWriter.cs" />
     <Compile Include="VesselSegmentatorFilter\CanalType.cs" />
     <Compile Include="VesselSegmentatorFilter\PointsPair.cs" />
@@ -115,6 +121,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
