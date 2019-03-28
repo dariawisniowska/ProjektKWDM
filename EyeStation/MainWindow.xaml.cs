@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using MaterialDesignThemes.Wpf;
 using EyeStation.Model;
+using EyeStation.Tools;
 
 namespace EyeStation
 {
@@ -27,6 +28,12 @@ namespace EyeStation
         {
             InitializeComponent();
         }
+
+        private List<Point> measurePoints;
+        private bool isMeasureTool = false;
+        private List<Point> anglePoints;
+        private bool isAngleTool = false;
+        private Line line;
 
         private void btnFourImage_Click(object sender, RoutedEventArgs e)
         {
@@ -46,44 +53,89 @@ namespace EyeStation
 
         private void btnMeasure_Checked(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Manualny pomiar długości na obrazie (wysegmentowanym?)
-             */
-
             btnAngle.IsChecked = false;
             btnSelect.IsChecked = false;
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
+
+            this.isMeasureTool = true;
+            this.measurePoints = new List<Point>();
         }
 
         private void btnMeasure_Unchecked(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Wyłączenie opcji
-             */
+            this.isMeasureTool = false;
+            if (this.measurePoints.Count > 0)
+            {
+                TextBlock textBlock = MeasureTool.getLengthOfActiveLine(this.measurePoints);
+                cnvMeasure.Children.Add(textBlock);
+                measurePoints = new List<Point>();
+            }
         }
 
         private void btnAngle_Checked(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Manualny pomiar kąta na obrazie (wysegmentowanym?)
-             */
-
             btnMeasure.IsChecked = false;
             btnSelect.IsChecked = false;
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
+
+            this.isAngleTool = true;
+            this.anglePoints = new List<Point>();
         }
 
         private void btnAngle_Unchecked(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Wyłączenie opcji
-             */
+            this.isAngleTool = false;
+
+            int pointCount = anglePoints.Count;
+            if (pointCount == 2)
+            {
+                cnvMeasure.Children.Remove(this.line);
+            }
+        }
+
+        private void cnvMeasure_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (isMeasureTool)
+            {
+                this.measurePoints.Add(e.GetPosition(cnvMeasure));
+                int pointCount = measurePoints.Count;
+                if (pointCount > 1)
+                {
+                    if (e.ClickCount == 1)
+                    {
+                        Line line = MeasureTool.createLine(measurePoints[pointCount - 2], measurePoints[pointCount - 1]);
+                        cnvMeasure.Children.Add(line);
+                    }
+                    else if (e.ClickCount == 2)
+                    {
+                        Line line = MeasureTool.createLine(measurePoints[pointCount - 2], measurePoints[pointCount - 1]);
+                        cnvMeasure.Children.Add(line);
+                        TextBlock textBlock = MeasureTool.getLengthOfActiveLine(this.measurePoints);
+                        cnvMeasure.Children.Add(textBlock);
+                        measurePoints = new List<Point>();
+                    }
+                }
+            }
+            if (isAngleTool)
+            {
+                this.anglePoints.Add(e.GetPosition(cnvMeasure));
+                int pointCount = anglePoints.Count;
+                if (pointCount == 2)
+                {
+                    this.line = MeasureTool.createLine(anglePoints[pointCount - 2], anglePoints[pointCount - 1]);
+                    cnvMeasure.Children.Add(line);
+                }
+                else if (pointCount == 3)
+                {
+                    this.line = MeasureTool.createLine(anglePoints[pointCount - 2], anglePoints[pointCount - 1]);
+                    cnvMeasure.Children.Add(line);
+                    TextBlock textBlock = MeasureTool.getAngleOfActiveLine(this.anglePoints);
+                    cnvMeasure.Children.Add(textBlock);
+                    this.anglePoints = new List<Point>();
+                }
+            }
         }
 
         private void btnSelect_Checked(object sender, RoutedEventArgs e)
@@ -159,8 +211,8 @@ namespace EyeStation
             mainPanel.Visibility = Visibility.Collapsed;
 
             List<Study> items = new List<Study>();
-            for (int i = 0; i<25; i++)
-                items.Add(new Study() { Id = i, Name = "Jan Kowalski", Description = "Opis"});
+            for (int i = 0; i < 25; i++)
+                items.Add(new Study() { Id = i, Name = "Jan Kowalski", Description = "Opis" });
 
             lvStudy.ItemsSource = items;
 
@@ -210,6 +262,8 @@ namespace EyeStation
                 imgMask.Source = new BitmapImage(new Uri(op.FileName));
                 imgMaskAndImage.Source = new BitmapImage(new Uri(op.FileName));
                 makeEnableAll();
+                selectStudyPanel.Visibility = Visibility.Collapsed;
+                mainPanel.Visibility = Visibility.Visible;
             }
         }
 
@@ -279,6 +333,5 @@ namespace EyeStation
             MessageBoxImage icon = MessageBoxImage.Information;
             MessageBox.Show(message, caption, button, icon);
         }
-        
     }
 }

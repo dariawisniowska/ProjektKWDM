@@ -93,6 +93,7 @@
     <Compile Include="PACSDAO\ImageConverter.cs" />
     <Compile Include="PACSDAO\PACS.cs" />
     <Compile Include="PACSDAO\Patient.cs" />
+    <Compile Include="Tools\MeasureTool.cs" />
     <Compile Include="VesselSegmentatorFilter\BitmapWriter.cs" />
     <Compile Include="VesselSegmentatorFilter\CanalType.cs" />
     <Compile Include="VesselSegmentatorFilter\PointsPair.cs" />

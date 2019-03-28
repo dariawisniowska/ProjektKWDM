@@ -305,6 +305,12 @@
                            RenderOptions.BitmapScalingMode="Fant"
                            Grid.Row="0"
                            x:Name="imgBig"/>
+                    <Canvas x:Name ="cnvMeasure" 
+                            Background="Transparent"
+                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            
+                            Grid.Row="0"
+                        />
                 </Grid>
                 <Grid Grid.Row="1" x:Name="gridFourImage" Visibility="Collapsed" Margin = "10 20 20 20">
                     <Grid>
