@@ -16,6 +16,8 @@ using Microsoft.Win32;
 using MaterialDesignThemes.Wpf;
 using EyeStation.Model;
 using EyeStation.Tools;
+using System.Drawing;
+using Point = System.Windows.Point;
 
 namespace EyeStation
 {
@@ -328,7 +330,7 @@ namespace EyeStation
                 mainPanel.Visibility = Visibility.Visible;
                 makeEnableAll();
 
-                cnvBig.Children.Clear();
+                clearAllCanvas();
             }
         }
 
@@ -360,18 +362,73 @@ namespace EyeStation
                 selectStudyPanel.Visibility = Visibility.Collapsed;
                 mainPanel.Visibility = Visibility.Visible;
 
-                cnvBig.Children.Clear();
+                clearAllCanvas();
             }
         }
 
         private void btnSaveImage_Click(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Zapis do png
-             */
-            uncheckedAll();
-            showDialog("Zapis do .png", "Obraz zapisano prawidłowo.");
+            String path = "";
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = ".png (*.png)|*.png";
+            if (sfd.ShowDialog() == true)
+            {
+                path = sfd.FileName;
+
+                System.Windows.Controls.Image image = null;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (btnOneImage.Visibility == Visibility.Collapsed)
+                    {
+                        image = imgBig;
+                    }
+                    else
+                    {
+                        switch (i)
+                        {
+                            case 0:
+                                image = imgSmall;
+                                break;
+                            case 1:
+                                image = imgGreen;
+                                break;
+                            case 2:
+                                image = imgMask;
+                                break;
+                            case 3:
+                                image = imgMaskAndImage;
+                                break;
+                        }
+                    }
+                    double width = image.ActualWidth;
+                    double height = image.ActualHeight;
+
+                    Point relativePoint = image.TransformToAncestor(Application.Current.MainWindow)
+                                  .Transform(new Point(0, 0));
+                    using (Bitmap bmp = new Bitmap((int)width,
+                        (int)height))
+                    {
+                        using (Graphics g = Graphics.FromImage(bmp))
+                        {
+
+                            //String filename = "ScreenCapture-" + DateTime.Now.ToString("ddMMyyyy-hhmmss") + "-" + i + ".png";
+                            Opacity = .0;
+                            g.CopyFromScreen((int)relativePoint.X, (int)relativePoint.Y, 0, 0, bmp.Size);
+                            bmp.Save(path.Insert(path.Length - 4, "-" + i));
+                            Opacity = 1;
+                        }
+                    }
+                    if (image == imgBig)
+                    {
+                        showDialog("Zapis do .png", "Obraz zapisano prawidłowo.");
+                        break;
+                    }
+                    if (i == 3)
+                    {
+                        showDialog("Zapis do .png", "Obrazy zapisano prawidłowo.");
+                    }
+                }
+            }
         }
 
         private void btnSegmentation_Click(object sender, RoutedEventArgs e)
@@ -460,6 +517,14 @@ namespace EyeStation
             btnSelect.IsChecked = false;
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
+        }
+
+        private void clearAllCanvas() {
+            cnvBig.Children.Clear();
+            cnvSmall.Children.Clear();
+            cnvGreen.Children.Clear();
+            cnvMask.Children.Clear();
+            cnvMaskAndImage.Children.Clear();
         }
     }
 }
