@@ -27,6 +27,12 @@ namespace EyeStation
         public MainWindow()
         {
             InitializeComponent();
+
+        }
+        void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Escape)
+                this.Close();
         }
 
         private List<Point> measurePoints;
@@ -34,6 +40,8 @@ namespace EyeStation
         private List<Point> anglePoints;
         private bool isAngleTool = false;
         private Line line;
+        private Line startLine;
+        private Canvas actualCanvas;
 
         private void btnFourImage_Click(object sender, RoutedEventArgs e)
         {
@@ -41,6 +49,7 @@ namespace EyeStation
             btnOneImage.Visibility = Visibility.Visible;
             gridOneImage.Visibility = Visibility.Collapsed;
             gridFourImage.Visibility = Visibility.Visible;
+            uncheckedAll();
         }
 
         private void btnOneImage_Click(object sender, RoutedEventArgs e)
@@ -49,6 +58,7 @@ namespace EyeStation
             btnFourImage.Visibility = Visibility.Visible;
             gridOneImage.Visibility = Visibility.Visible;
             gridFourImage.Visibility = Visibility.Collapsed;
+            uncheckedAll();
         }
 
         private void btnMeasure_Checked(object sender, RoutedEventArgs e)
@@ -58,6 +68,8 @@ namespace EyeStation
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
 
+            setSizeOfCanvas();
+
             this.isMeasureTool = true;
             this.measurePoints = new List<Point>();
         }
@@ -65,12 +77,21 @@ namespace EyeStation
         private void btnMeasure_Unchecked(object sender, RoutedEventArgs e)
         {
             this.isMeasureTool = false;
-            if (this.measurePoints.Count > 0)
+            if (this.measurePoints.Count == 1)
             {
-                TextBlock textBlock = MeasureTool.getLengthOfActiveLine(this.measurePoints);
-                cnvMeasure.Children.Add(textBlock);
-                measurePoints = new List<Point>();
+                this.actualCanvas.Children.Remove(this.startLine);
             }
+            else if (this.measurePoints.Count > 1)
+            {
+                BitmapImage bmp = (BitmapImage)imgBig.Source;
+                int srcHeight = bmp.PixelHeight;
+                double actualHeight = imgBig.ActualHeight;
+                double pixelSize = 1;
+
+                TextBlock textBlock = MeasureTool.getLengthOfActiveLine(this.measurePoints, srcHeight, actualHeight, pixelSize);
+                this.actualCanvas.Children.Add(textBlock);
+            }
+            measurePoints = new List<Point>();
         }
 
         private void btnAngle_Checked(object sender, RoutedEventArgs e)
@@ -79,6 +100,8 @@ namespace EyeStation
             btnSelect.IsChecked = false;
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
+
+            setSizeOfCanvas();
 
             this.isAngleTool = true;
             this.anglePoints = new List<Point>();
@@ -89,51 +112,116 @@ namespace EyeStation
             this.isAngleTool = false;
 
             int pointCount = anglePoints.Count;
-            if (pointCount == 2)
+            if (pointCount == 1)
+                this.actualCanvas.Children.Remove(this.startLine);
+            else if (pointCount == 2)
             {
-                cnvMeasure.Children.Remove(this.line);
+                this.actualCanvas.Children.Remove(this.line);
+                this.actualCanvas.Children.Remove(this.startLine);
             }
         }
 
         private void cnvMeasure_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            Canvas cnv = (Canvas)sender;
+
             if (isMeasureTool)
             {
-                this.measurePoints.Add(e.GetPosition(cnvMeasure));
+                this.measurePoints.Add(e.GetPosition(cnv));
                 int pointCount = measurePoints.Count;
-                if (pointCount > 1)
+                if (pointCount == 1)
                 {
-                    if (e.ClickCount == 1)
+                    this.actualCanvas = cnv;
+                    Point startPoint = new Point(measurePoints[0].X + 1, measurePoints[0].Y + 1);
+                    this.startLine = MeasureTool.createLine(measurePoints[0], startPoint);
+                    cnv.Children.Add(this.startLine);
+                }
+                else if (pointCount > 1)
+                {
+                    if (e.ClickCount == 1 && this.actualCanvas == cnv)
                     {
                         Line line = MeasureTool.createLine(measurePoints[pointCount - 2], measurePoints[pointCount - 1]);
-                        cnvMeasure.Children.Add(line);
+                        cnv.Children.Add(line);
                     }
-                    else if (e.ClickCount == 2)
+                    else
                     {
-                        Line line = MeasureTool.createLine(measurePoints[pointCount - 2], measurePoints[pointCount - 1]);
-                        cnvMeasure.Children.Add(line);
-                        TextBlock textBlock = MeasureTool.getLengthOfActiveLine(this.measurePoints);
-                        cnvMeasure.Children.Add(textBlock);
-                        measurePoints = new List<Point>();
+                        BitmapImage bmp = (BitmapImage)imgBig.Source;
+                        int srcHeight = bmp.PixelHeight;
+                        double actualHeight = 0;
+                        if (cnv == cnvBig)
+                            actualHeight = imgBig.ActualHeight;
+                        else
+                            actualHeight = imgSmall.ActualHeight;
+                        double pixelSize = 1;
+                        if (e.ClickCount == 2 && this.actualCanvas == cnv)
+                        {
+                            Line line = MeasureTool.createLine(measurePoints[pointCount - 2], measurePoints[pointCount - 1]);
+                            cnv.Children.Add(line);
+                            TextBlock textBlock = MeasureTool.getLengthOfActiveLine(this.measurePoints, srcHeight, actualHeight, pixelSize);
+                            cnv.Children.Add(textBlock);
+                            measurePoints = new List<Point>();
+                        }
+                        else if (this.actualCanvas != cnv)
+                        {
+                            if (pointCount == 2)
+                                this.actualCanvas.Children.Remove(startLine);
+                            else
+                            {
+                                this.measurePoints.RemoveAt(pointCount - 1);
+                                TextBlock textBlock = MeasureTool.getLengthOfActiveLine(this.measurePoints, srcHeight, actualHeight, pixelSize);
+                                this.actualCanvas.Children.Add(textBlock);
+                            }
+                            measurePoints = new List<Point>();
+                            this.measurePoints.Add(e.GetPosition(cnv));
+                            this.actualCanvas = cnv;
+                            Point startPoint = new Point(measurePoints[0].X + 1, measurePoints[0].Y + 1);
+                            this.startLine = MeasureTool.createLine(measurePoints[0], startPoint);
+                            cnv.Children.Add(this.startLine);
+                        }
                     }
                 }
             }
             if (isAngleTool)
             {
-                this.anglePoints.Add(e.GetPosition(cnvMeasure));
+                this.anglePoints.Add(e.GetPosition(cnv));
                 int pointCount = anglePoints.Count;
-                if (pointCount == 2)
+                if (pointCount == 1)
                 {
-                    this.line = MeasureTool.createLine(anglePoints[pointCount - 2], anglePoints[pointCount - 1]);
-                    cnvMeasure.Children.Add(line);
+                    this.actualCanvas = cnv;
+                    Point startPoint = new Point(anglePoints[0].X + 1, anglePoints[0].Y + 1);
+                    this.startLine = MeasureTool.createLine(anglePoints[0], startPoint);
+                    cnv.Children.Add(this.startLine);
                 }
-                else if (pointCount == 3)
+                else if (pointCount == 2 && this.actualCanvas == cnv)
                 {
                     this.line = MeasureTool.createLine(anglePoints[pointCount - 2], anglePoints[pointCount - 1]);
-                    cnvMeasure.Children.Add(line);
+                    cnv.Children.Add(line);
+                }
+                else if (pointCount == 3 && this.actualCanvas == cnv)
+                {
+                    this.line = MeasureTool.createLine(anglePoints[pointCount - 2], anglePoints[pointCount - 1]);
+                    cnv.Children.Add(line);
                     TextBlock textBlock = MeasureTool.getAngleOfActiveLine(this.anglePoints);
-                    cnvMeasure.Children.Add(textBlock);
+                    cnv.Children.Add(textBlock);
                     this.anglePoints = new List<Point>();
+                }
+                else
+                {
+                    if (pointCount == 2)
+                    {
+                        this.actualCanvas.Children.Remove(this.startLine);
+                    }
+                    else if (pointCount == 3)
+                    {
+                        this.actualCanvas.Children.Remove(this.line);
+                        this.actualCanvas.Children.Remove(this.startLine);
+                    }
+                    this.actualCanvas = cnv;
+                    this.anglePoints = new List<Point>();
+                    this.anglePoints.Add(e.GetPosition(cnv));
+                    Point startPoint = new Point(anglePoints[0].X + 1, anglePoints[0].Y + 1);
+                    this.startLine = MeasureTool.createLine(anglePoints[0], startPoint);
+                    cnv.Children.Add(this.startLine);
                 }
             }
         }
@@ -149,6 +237,8 @@ namespace EyeStation
             btnAngle.IsChecked = false;
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
+
+            setSizeOfCanvas();
         }
         private void btnSelect_Unchecked(object sender, RoutedEventArgs e)
         {
@@ -170,6 +260,7 @@ namespace EyeStation
             btnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
 
+            setSizeOfCanvas();
         }
 
         private void btnUnSelect_Unchecked(object sender, RoutedEventArgs e)
@@ -191,6 +282,8 @@ namespace EyeStation
             btnAngle.IsChecked = false;
             btnSelect.IsChecked = false;
             btnUnSelect.IsChecked = false;
+
+            setSizeOfCanvas();
         }
 
         private void btnAddMarker_Unchecked(object sender, RoutedEventArgs e)
@@ -207,6 +300,7 @@ namespace EyeStation
             /* 
              * Połączenie z serwerem i wyświetlenie rzeczywistych danych
              */
+            uncheckedAll();
             selectStudyPanel.Visibility = Visibility.Visible;
             mainPanel.Visibility = Visibility.Collapsed;
 
@@ -215,7 +309,6 @@ namespace EyeStation
                 items.Add(new Study() { Id = i, Name = "Jan Kowalski", Description = "Opis" });
 
             lvStudy.ItemsSource = items;
-
         }
 
         private void lvStudy_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -234,6 +327,8 @@ namespace EyeStation
                 selectStudyPanel.Visibility = Visibility.Collapsed;
                 mainPanel.Visibility = Visibility.Visible;
                 makeEnableAll();
+
+                cnvBig.Children.Clear();
             }
         }
 
@@ -250,7 +345,7 @@ namespace EyeStation
             /* 
              * Dodanie dicoma do pacsa
              */
-
+            uncheckedAll();
             OpenFileDialog op = new OpenFileDialog();
             op.Title = "Wybierz plik DICOM";
             //op.Filter = "DICOM (*.dcm;*.vtk)|*.dcm;*.vtk";
@@ -264,6 +359,8 @@ namespace EyeStation
                 makeEnableAll();
                 selectStudyPanel.Visibility = Visibility.Collapsed;
                 mainPanel.Visibility = Visibility.Visible;
+
+                cnvBig.Children.Clear();
             }
         }
 
@@ -273,6 +370,7 @@ namespace EyeStation
             /* 
              * Zapis do png
              */
+            uncheckedAll();
             showDialog("Zapis do .png", "Obraz zapisano prawidłowo.");
         }
 
@@ -282,6 +380,7 @@ namespace EyeStation
             /* 
              * Segmentacja naczyń krwionośnych
              */
+            uncheckedAll();
             showDialog("Segmentacja", "Segmentacja zakończona powodzeniem.");
         }
 
@@ -291,9 +390,9 @@ namespace EyeStation
             /* 
              * Okno z informacją o podejrzeniu choroby
              */
+            uncheckedAll();
             string result = "Istnieje podejrzenie retinopatii";
             showDialog("Analiza retinopatii", result);
-
         }
 
         private void btnDesription_Click(object sender, RoutedEventArgs e)
@@ -302,6 +401,7 @@ namespace EyeStation
             /* 
              * Okno z możliwością edycji treści opisu
              */
+            uncheckedAll();
         }
 
         private void btnReport_Click(object sender, RoutedEventArgs e)
@@ -310,6 +410,7 @@ namespace EyeStation
             /* 
              * Automatyczne generowanie raportu z badania
              */
+            uncheckedAll();
             showDialog("Raport", "Generowanie raportu zakończone powodzeniem.");
         }
 
@@ -332,6 +433,33 @@ namespace EyeStation
             MessageBoxButton button = MessageBoxButton.OK;
             MessageBoxImage icon = MessageBoxImage.Information;
             MessageBox.Show(message, caption, button, icon);
+        }
+
+        private void setSizeOfCanvas()
+        {
+            cnvBig.Height = imgBig.ActualHeight;
+            cnvBig.Width = imgBig.ActualWidth;
+
+            cnvSmall.Height = imgSmall.ActualHeight;
+            cnvSmall.Width = imgSmall.ActualWidth;
+
+            cnvGreen.Height = imgGreen.ActualHeight;
+            cnvGreen.Width = imgGreen.ActualWidth;
+
+            cnvMask.Height = imgMask.ActualHeight;
+            cnvMask.Width = imgMask.ActualWidth;
+
+            cnvMaskAndImage.Height = imgMaskAndImage.ActualHeight;
+            cnvMaskAndImage.Width = imgMaskAndImage.ActualWidth;
+        }
+
+        private void uncheckedAll()
+        {
+            btnMeasure.IsChecked = false;
+            btnAngle.IsChecked = false;
+            btnSelect.IsChecked = false;
+            btnUnSelect.IsChecked = false;
+            btnAddMarker.IsChecked = false;
         }
     }
 }

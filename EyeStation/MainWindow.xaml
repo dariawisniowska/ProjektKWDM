@@ -11,19 +11,20 @@
         TextElement.FontSize="13"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
-        
-        MinHeight="600"
-        MinWidth="800"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        FontFamily="{DynamicResource MaterialDesignFont}">
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        WindowState="Maximized"
+        KeyDown="MainWindow_KeyDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid Grid.ColumnSpan="2" Background="#05fce5">
@@ -271,7 +272,7 @@
                     <RowDefinition Height="45" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Grid Margin="10 0 20 0" Grid.Row="0">
+                <Grid Margin="20 0 30 0" Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -299,18 +300,22 @@
                         Margin="10 15 0 0">
                     </Slider>
                 </Grid>
-                <Grid Grid.Row="1" x:Name="gridOneImage" Visibility="Visible" Margin = "10 0 20 20">
+                <Grid Grid.Row="1" x:Name="gridOneImage" Visibility="Visible" Margin = "20 0 30 30">
                     <Image VerticalAlignment = "Top" 
+                           HorizontalAlignment="Center"
                            Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="Fant"
+                           RenderOptions.BitmapScalingMode="HighQuality"
                            Grid.Row="0"
-                           x:Name="imgBig"/>
-                    <Canvas x:Name ="cnvMeasure" 
+                           x:Name="imgBig"
+                           >
+
+                    </Image>
+                    <Canvas x:Name ="cnvBig" 
                             Background="Transparent"
                             MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
-                            
                             Grid.Row="0"
-                        />
+                            VerticalAlignment = "Top" 
+                            HorizontalAlignment="Center"/>
                 </Grid>
                 <Grid Grid.Row="1" x:Name="gridFourImage" Visibility="Collapsed" Margin = "10 20 20 20">
                     <Grid>
@@ -329,6 +334,14 @@
                            Grid.Row="0"
                            Grid.Column="0"
                            x:Name="imgSmall"/>
+                        <Canvas x:Name ="cnvSmall" 
+                            Background="Transparent"
+                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalAlignment = "Top" 
+                            HorizontalAlignment="Center"/>
+
                         <Image VerticalAlignment = "Top" 
                            Margin = "10 0 0 10" 
                            Stretch="Uniform"
@@ -336,6 +349,14 @@
                            Grid.Row="0"
                            Grid.Column="1"
                            x:Name="imgGreen"/>
+                        <Canvas x:Name ="cnvGreen" 
+                            Background="Transparent"
+                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            VerticalAlignment = "Top" 
+                            HorizontalAlignment="Center"/>
+                        
                         <Image VerticalAlignment = "Top" 
                            Margin = "0 10 10 0" 
                            Stretch="Uniform"
@@ -343,6 +364,13 @@
                            Grid.Row="1"
                            Grid.Column="0"
                            x:Name="imgMask"/>
+                        <Canvas x:Name ="cnvMask" 
+                            Background="Transparent"
+                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            VerticalAlignment = "Top" 
+                            HorizontalAlignment="Center"/>
                         <Image VerticalAlignment = "Top" 
                            Margin = "10 10 0 0" 
                            Stretch="Uniform"
@@ -350,6 +378,13 @@
                            Grid.Row="1"
                            Grid.Column="1"
                            x:Name="imgMaskAndImage"/>
+                        <Canvas x:Name ="cnvMaskAndImage" 
+                            Background="Transparent"
+                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            VerticalAlignment = "Top" 
+                            HorizontalAlignment="Center"/>
                     </Grid>
                 </Grid>
             </Grid>
