@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EyeStation.PACSDAO
+namespace EyeStation.PACS
 {
     public class Patient
     {
@@ -55,10 +55,10 @@ namespace EyeStation.PACSDAO
                 switch (elements[0])
                 {
                     case "(0010,0020)":
-                        patientID = elements[elements.Length-1];
+                        patientID = elements[3];
                         break;
                     case "(0010,0010)":
-                        patientName = elements[elements.Length - 1];
+                        patientName = elements[3];
                         break;
                 }
             }

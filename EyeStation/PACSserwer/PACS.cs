@@ -1,4 +1,4 @@
-﻿using EyeStation.PACSDAO;
+﻿using EyeStation.PACS;
 using gdcm;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace EyeStation.PACSDAO
+namespace EyeStation.PACS
 {
     public class PACSObj
     {
@@ -15,8 +15,11 @@ namespace EyeStation.PACSDAO
         private ushort port;
         private string aet;
         private string call;
-        public List<PACSDAO.Patient> data = new List<Patient>();
-
+        private Dictionary<string, System.Drawing.Image> Images = new Dictionary<string, System.Drawing.Image>();
+        private Dictionary<string, Dictionary<string, string>> Datas = new Dictionary<string, Dictionary<string, string>>();
+        private List<string> ImageNames = new List<string>();
+        List<Patient> patientList = new List<Patient>();
+        private string dane;
         public PACSObj(string ip, ushort port, string aet, string call)
         {
             this.ip = ip;
@@ -29,57 +32,44 @@ namespace EyeStation.PACSDAO
         {
             try
             {
-                bool result = CompositeNetworkFunctions.CEcho(this.ip, this.port, this.aet, this.call);
-                if (result) GetData();
-                return result;
+                return CompositeNetworkFunctions.CEcho(this.ip, this.port, this.aet, this.call);
 
             }
-            catch(Exception ex)
+            catch
             {
-                MessageBox.Show(ex.ToString(),"Error");
                 return false;
             }
         }
 
-        public List<EyeStation.Model.Study> GetStudies()
+        public List<Patient> GetAllData()
         {
-            List<EyeStation.Model.Study> studies = new List<EyeStation.Model.Study>();
-            foreach (Patient p in data)
-            {
-                foreach (string name in p.imagesNames)
+                gdcm.DataSetArrayType wynik = PatientQuery();
+                // pokaż wyniki
+                foreach (gdcm.DataSet x in wynik)
                 {
-                    string path = System.IO.Directory.GetCurrentDirectory() + name.Remove(0, 1)+".jpg";
-                    string klucz = name.Replace("\\", "\\\\");
-                    Dictionary<string,string> dict = p.datas[klucz];
-                    string desc = dict["(0008,1080)"];
-                    if (desc == "0") desc = "-";
-                    studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, desc, p.images[name], path));
+                    PatientDataReader de = new PatientDataReader(x.toString());
+
+                    FramesQuery(de.PatientID);
+
+                    patientList.Add(new Patient(de.PatientID, de.PatientName, ImageNames, Images, dane, Datas));
                 }
+            return patientList;
+        }
+
+        public List<Study> GetStudies()
+        {
+            List<Study> studies = new List<Study>();
+            foreach (Patient p in patientList)
+            {
+                //foreach (KeyValuePair<string, string> pair in p.datas)
+                //{
+                //   studies.Add(new Study(p.patientID, p.patientName,pair(""),Images[ImageNames]);
+                //}
             }
             return studies;
         }
 
-        private void GetData()
-        {
-            gdcm.DataSetArrayType wynik = PatientQuery();
-            // pokaż wyniki
-            foreach (gdcm.DataSet x in wynik)
-            {
-                EyeStation.PACSDAO.PatientDataReader de = new EyeStation.PACSDAO.PatientDataReader(x.toString());
-
-                string dane;
-                Dictionary<string, System.Drawing.Image> Images;
-                List<string> ImageNames;
-                Dictionary<string, Dictionary<string, string>> Datas;
-
-                FramesQuery(de.PatientID, out dane, out Images, out ImageNames, out Datas);
-  
-
-                data.Add(new PACSDAO.Patient(de.PatientID, de.PatientName, ImageNames, Images, dane, Datas));
-            }
-        }
-      
-        private void FramesQuery(string PatientId, out string dane, out Dictionary<string, System.Drawing.Image> Images, out List<string> ImageNames, out Dictionary<string, Dictionary<string, string>> Datas)
+        private void FramesQuery(string PatientId)
         {
 
             gdcm.ERootType typ = gdcm.ERootType.ePatientRootType;
@@ -109,7 +99,7 @@ namespace EyeStation.PACSDAO
             System.IO.Directory.CreateDirectory(dane);
 
             // wykonaj zapytanie - pobierz do katalogu _dane_
-            bool stan = gdcm.CompositeNetworkFunctions.CMove(ip, port, zapytanie, 10104, aet, call, dane);
+            bool stan = gdcm.CompositeNetworkFunctions.CMove(ip, port, zapytanie, port, aet, call, dane);
 
             // sprawdź stan
             if (!stan)
@@ -117,10 +107,9 @@ namespace EyeStation.PACSDAO
                 MessageBox.Show("PACS server doesn't work.", "Error");
             }
             // skasowanie listy zdjęć
-            Images = new Dictionary<string, System.Drawing.Image>();
-            ImageNames = new List<string>();
-            Datas = new Dictionary<string, Dictionary<string, string>>();
-
+            Images.Clear();
+            ImageNames.Clear();
+            Datas.Clear();
             List<string> pliki = new List<string>(System.IO.Directory.EnumerateFiles(dane));  //nazwy plikow
 
             foreach (String plik in pliki)
@@ -170,9 +159,9 @@ namespace EyeStation.PACSDAO
 
 
                 // przekonwertuj na "znany format"
-                gdcm.Bitmap bmjpeg2000 = ImageConverter.pxmap2jpeg2000(reader.GetPixmap());
+                gdcm.Bitmap bmjpeg2000 = PACS.ImageConverter.pxmap2jpeg2000(reader.GetPixmap());
                 // przekonwertuj na .NET bitmapy
-                System.Drawing.Bitmap[] X = ImageConverter.gdcmBitmap2Bitmap(bmjpeg2000);
+                System.Drawing.Bitmap[] X = PACS.ImageConverter.gdcmBitmap2Bitmap(bmjpeg2000);
 
                 // zapisz
                 for (int i = 0; i < X.Length; i++)
@@ -180,22 +169,25 @@ namespace EyeStation.PACSDAO
                     String name = "";
                     if (X.Length > 1)
                     {
-                        name = String.Format("{0}_slice{1}.jpg", plik.Substring(0, plik.Length - 4), i);
-                        Images.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4), i), X[i]);
-                        ImageNames.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4)));
-                        Datas.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4), i), dataValues);
+                        name = String.Format("{0}_slice{1}.jpg", plik, i);
+                        Images.Add(String.Format("{0}_slice{1}", id[id.Length - 1], i), X[i]);
+                        ImageNames.Add(String.Format("{0}_slice{1}", id[id.Length - 1], i));
+                        Datas.Add(String.Format("{0}_slice{1}", id[id.Length - 1], i), dataValues);
                     }
                     else
                     {
-                        name = String.Format("{0}.jpg", plik.Substring(0,plik.Length-4));
-                        Images.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)), X[i]);
-                        ImageNames.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)));
-                        Datas.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)).Replace("\\","\\\\"), dataValues);
+                        name = String.Format("{0}.jpg", plik);
+                        Images.Add(String.Format("{0}", id[id.Length - 1]), X[i]);
+                        ImageNames.Add(String.Format("{0}", id[id.Length - 1]));
+                        Datas.Add(String.Format("{0}", id[id.Length - 1]), dataValues);
                     }
 
                     X[i].Save(name);
+
+
                 }
             }
+
         }
 
         private gdcm.DataSetArrayType PatientQuery()
@@ -208,7 +200,9 @@ namespace EyeStation.PACSDAO
 
             // klucze (filtrowanie lub określenie, które dane są potrzebne)
             gdcm.KeyValuePairArrayType klucze = new gdcm.KeyValuePairArrayType();
-            klucze.Add(new gdcm.KeyValuePairType(new gdcm.Tag(0x0010, 0x0010), "*"));
+            //gdcm.Tag tag = new gdcm.Tag(0x0010, 0x0010);
+            gdcm.KeyValuePairType klucz1 = new gdcm.KeyValuePairType(new gdcm.Tag(0x0010, 0x0010), "*");
+            klucze.Add(klucz1);
             klucze.Add(new gdcm.KeyValuePairType(new gdcm.Tag(0x0010, 0x0020), ""));
 
             // skonstruuj zapytanie

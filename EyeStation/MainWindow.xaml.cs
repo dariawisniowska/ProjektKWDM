@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using MaterialDesignThemes.Wpf;
 using EyeStation.Model;
+using EyeStation.PACSDAO;
 
 namespace EyeStation
 {
@@ -23,9 +24,14 @@ namespace EyeStation
     /// </summary>
     public partial class MainWindow : Window
     {
+        public PACSObj serwer;
+       
         public MainWindow()
         {
             InitializeComponent();
+            serwer = new PACSObj("127.0.0.1", 10100, "KLIENTL", "ARCHIWUM");
+            serwer.Connect();
+            List<PACSDAO.Patient> data = serwer.data;
         }
 
         private void btnFourImage_Click(object sender, RoutedEventArgs e)
@@ -159,8 +165,10 @@ namespace EyeStation
             mainPanel.Visibility = Visibility.Collapsed;
 
             List<Study> items = new List<Study>();
-            for (int i = 0; i<25; i++)
-                items.Add(new Study() { Id = i, Name = "Jan Kowalski", Description = "Opis"});
+            //for (int i = 0; i<25; i++)
+            //    items.Add(new Study() { Id = i, Name = "Jan Kowalski", Description = "Opis"});
+
+            items = serwer.GetStudies();
 
             lvStudy.ItemsSource = items;
 
@@ -175,13 +183,15 @@ namespace EyeStation
             if (lvStudy.SelectedItems.Count != 0)
             {
                 Study study = (Study)lvStudy.SelectedItems[0];
-                showDialog("PACS", "W przyszłości wyświetlę obraz.");
+               // showDialog("PACS", "W przyszłości wyświetlę obraz.");
 
                 makeEnableAll();
 
                 selectStudyPanel.Visibility = Visibility.Collapsed;
                 mainPanel.Visibility = Visibility.Visible;
                 makeEnableAll();
+
+                imgBig.Source = study.ImageSource;
             }
         }
 

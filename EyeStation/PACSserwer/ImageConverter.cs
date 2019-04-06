@@ -4,9 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
-namespace EyeStation.PACSDAO
+namespace EyeStation.PACS
 {
     public static class ImageConverter
     {
@@ -29,8 +28,8 @@ namespace EyeStation.PACSDAO
             // w strumieniu na każdy piksel 2 bajty; tutaj LittleEndian (mnie znaczący bajt wcześniej)
             for (uint l = 0; l < layers; l++)
             {
-                Bitmap X = new Bitmap((int)rows, (int)cols);
-                double[,] Y = new double[rows, cols];
+                Bitmap X = new Bitmap((int)cols, (int)rows);
+                double[,] Y = new double[cols, rows];
                 double m = 0;
 
                 for (int r = 0; r < rows; r++)
@@ -49,7 +48,7 @@ namespace EyeStation.PACSDAO
                     for (int c = 0; c < cols; c++)
                     {
                         int f = (int)(255 * (Y[r, c] / m));
-                        X.SetPixel(r, c, Color.FromArgb(f, f, f));
+                        X.SetPixel(c, r, Color.FromArgb(f, f, f));
                     }
                 // kolejna bitmapa
                 ret[l] = X;
