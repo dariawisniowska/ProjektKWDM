@@ -12,19 +12,25 @@ namespace EyeStation.Tools
 {
     public static class MeasureTool
     {
+        public enum TextBlockColor {
+            Blue,
+            Mint
+        }
         public static Line createLine(Point point1, Point point2)
         {
             var brush = new SolidColorBrush(Color.FromRgb(5, 252, 229));
             return new Line() { X1 = point1.X, Y1 = point1.Y, X2 = point2.X, Y2 = point2.Y, Stroke = brush, StrokeThickness = 3 };
         }
 
-        public static TextBlock createTextBox()
+        public static TextBlock createTextBox(TextBlockColor txbColor)
         {
             TextBlock textBlock = new TextBlock();
-
-            Color blue = new Color();
-            blue = Color.FromRgb(144, 202, 249);
-            textBlock.Background = new SolidColorBrush(blue);
+            Color color = new Color();
+            if (txbColor.Equals(TextBlockColor.Blue))
+                color = Color.FromRgb(144, 202, 249);
+            else
+                color = Color.FromRgb(5, 252, 229);
+            textBlock.Background = new SolidColorBrush(color);
             textBlock.Foreground = new SolidColorBrush(Colors.Black);
             textBlock.FontSize = 15;
 
@@ -43,7 +49,7 @@ namespace EyeStation.Tools
 
             length = pixelSize * length * srcHeight / actualHeight;
 
-            TextBlock textBlock = MeasureTool.createTextBox();
+            TextBlock textBlock = MeasureTool.createTextBox(TextBlockColor.Blue);
             textBlock.Text = " " + Math.Round(length) + "px ";
             Canvas.SetLeft(textBlock, measurePoints[pointCount - 1].X);
             Canvas.SetTop(textBlock, measurePoints[pointCount - 1].Y);
@@ -60,12 +66,18 @@ namespace EyeStation.Tools
             double y2 = anglePoints[pointCount - 2].Y - anglePoints[pointCount - 1].Y;
             double angle = Math.Acos((x1 * x2 + y1 * y2) / (Math.Sqrt(x1 * x1 + y1 * y1) * Math.Sqrt(x2 * x2 + y2 * y2))) * 180 / Math.PI;
 
-            TextBlock textBlock = MeasureTool.createTextBox();
+            TextBlock textBlock = MeasureTool.createTextBox(TextBlockColor.Blue);
             textBlock.Text = " " + Math.Round(angle) + "° ";
             Canvas.SetLeft(textBlock, anglePoints[pointCount - 2].X);
             Canvas.SetTop(textBlock, anglePoints[pointCount - 2].Y);
 
             return textBlock;
+        }
+
+        public static Ellipse createMarker(Point point)
+        {
+            var brush = new SolidColorBrush(Color.FromRgb(5, 252, 229));
+            return new Ellipse() { Margin = new Thickness(point.X - 13, point.Y - 13, 0,0), Height=26, Width=26, Stroke = brush, StrokeThickness = 3 , Fill = brush};
         }
     }
 }

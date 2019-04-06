@@ -119,6 +119,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CustomDialogs\InputDialog.xaml.cs">
+      <DependentUpon>InputDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomDialogs\SimpleDialog.xaml.cs">
+      <DependentUpon>SimpleDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Marker.cs" />
     <Compile Include="Models\Study.cs" />
     <Compile Include="PACSDAO\ImageConverter.cs" />
     <Compile Include="PACSDAO\PACS.cs" />
@@ -130,6 +137,14 @@
     <Compile Include="VesselSegmentatorFilter\SVMFeatures.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentatioMethod.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentator.cs" />
+    <Page Include="CustomDialogs\InputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomDialogs\SimpleDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -174,6 +189,8 @@
     <Content Include="bin\x64\Debug\SimpleITKCSharpNative.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Images\icon.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
