@@ -28,6 +28,24 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid Grid.ColumnSpan="2" Background="#05fce5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Background="{x:Null}">
+                <Image
+                    Name="logo"
+                    Width="70"
+                    Height="70"
+                    Margin="20 0 0 0"
+                HorizontalAlignment="Left"
+                Source="/Images/icon.png">
+
+                </Image>
+                <Label
+                    FontSize="20"
+                    VerticalAlignment="Center"
+                    Foreground="Black"
+                    Name="lbl_logo">
+                    EYE STATION
+                </Label>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Background="{x:Null}">
                 <ToggleButton
                     Style="{StaticResource MaterialDesignActionLightToggleButton}"
@@ -312,7 +330,7 @@
                     </Image>
                     <Canvas x:Name ="cnvBig" 
                             Background="Transparent"
-                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="0"
                             VerticalAlignment = "Top" 
                             HorizontalAlignment="Center"/>
@@ -336,7 +354,7 @@
                            x:Name="imgSmall"/>
                         <Canvas x:Name ="cnvSmall" 
                             Background="Transparent"
-                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="0"
                             Grid.Column="0"
                             VerticalAlignment = "Top" 
@@ -351,7 +369,7 @@
                            x:Name="imgGreen"/>
                         <Canvas x:Name ="cnvGreen" 
                             Background="Transparent"
-                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="0"
                             Grid.Column="1"
                             VerticalAlignment = "Top" 
@@ -366,7 +384,7 @@
                            x:Name="imgMask"/>
                         <Canvas x:Name ="cnvMask" 
                             Background="Transparent"
-                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="1"
                             Grid.Column="0"
                             VerticalAlignment = "Top" 
@@ -380,7 +398,7 @@
                            x:Name="imgMaskAndImage"/>
                         <Canvas x:Name ="cnvMaskAndImage" 
                             Background="Transparent"
-                            MouseLeftButtonDown="cnvMeasure_MouseLeftButtonDown"
+                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="1"
                             Grid.Column="1"
                             VerticalAlignment = "Top" 

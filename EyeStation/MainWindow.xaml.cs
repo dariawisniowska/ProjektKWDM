@@ -19,6 +19,9 @@ using EyeStation.Tools;
 using System.Drawing;
 using Point = System.Windows.Point;
 using EyeStation.PACSDAO;
+using EyeStation.CustomDialogs;
+using EyeStation.Models;
+using System.IO;
 
 namespace EyeStation
 {
@@ -46,6 +49,8 @@ namespace EyeStation
         private bool isMeasureTool = false;
         private List<Point> anglePoints;
         private bool isAngleTool = false;
+        private List<Marker> markersPoints;
+        private bool isMarkerTool = false;
         private Line line;
         private Line startLine;
         private Canvas actualCanvas;
@@ -128,7 +133,7 @@ namespace EyeStation
             }
         }
 
-        private void cnvMeasure_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void cnv_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             Canvas cnv = (Canvas)sender;
 
@@ -231,6 +236,34 @@ namespace EyeStation
                     cnv.Children.Add(this.startLine);
                 }
             }
+            if (isMarkerTool)
+            {
+                Point point = e.GetPosition(cnv);
+
+                InputDialog inputDialog = new InputDialog("Nowy znacznik", "Wprowadź opis dle wskazanego znacznika:", "");
+                if (inputDialog.ShowDialog() == true && inputDialog.Answer != null && inputDialog.Answer != "")
+                {
+                    Ellipse elipse = MeasureTool.createMarker(point);
+                    ToolTip tt = new ToolTip();
+                    tt.Content = wrapText(100, inputDialog.Answer);
+                    elipse.ToolTip = tt;
+                    cnv.Children.Add(elipse);
+                    TextBlock textBlock = MeasureTool.createTextBox(MeasureTool.TextBlockColor.Mint);
+                    textBlock.Text = (this.markersPoints.Count + 1).ToString();
+                    textBlock.FontSize = 11;
+
+                    Canvas.SetLeft(textBlock, point.X - 3);
+                    Canvas.SetTop(textBlock, point.Y - 5);
+                    textBlock.ToolTip = tt;
+                    cnv.Children.Add(textBlock);
+
+                    Marker marker = new Marker();
+                    marker.Id = this.markersPoints.Count + 1;
+                    marker.point = point;
+                    marker.Description = inputDialog.Answer;
+                    this.markersPoints.Add(marker);
+                }
+            }
         }
 
         private void btnSelect_Checked(object sender, RoutedEventArgs e)
@@ -291,14 +324,12 @@ namespace EyeStation
             btnUnSelect.IsChecked = false;
 
             setSizeOfCanvas();
+            this.isMarkerTool = true;
         }
 
         private void btnAddMarker_Unchecked(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Wyłączenie opcji
-             */
+            this.isMarkerTool = false;
         }
 
         private void btnGetImage_Click(object sender, RoutedEventArgs e)
@@ -329,7 +360,6 @@ namespace EyeStation
             if (lvStudy.SelectedItems.Count != 0)
             {
                 Study study = (Study)lvStudy.SelectedItems[0];
-               // showDialog("PACS", "W przyszłości wyświetlę obraz.");
 
                 makeEnableAll();
 
@@ -338,6 +368,11 @@ namespace EyeStation
                 makeEnableAll();
 
                 imgBig.Source = study.ImageSource;
+                imgSmall.Source = study.ImageSource;
+                imgGreen.Source = study.ImageSource;
+                imgMask.Source = study.ImageSource;
+                imgMaskAndImage.Source = study.ImageSource;
+                clearAllCanvas();
             }
         }
 
@@ -417,22 +452,40 @@ namespace EyeStation
                     {
                         using (Graphics g = Graphics.FromImage(bmp))
                         {
-
-                            //String filename = "ScreenCapture-" + DateTime.Now.ToString("ddMMyyyy-hhmmss") + "-" + i + ".png";
                             Opacity = .0;
                             g.CopyFromScreen((int)relativePoint.X, (int)relativePoint.Y, 0, 0, bmp.Size);
-                            bmp.Save(path.Insert(path.Length - 4, "-" + i));
+                            string newPath = path;
+                            if (image != imgBig)
+                            {
+                                newPath = path.Insert(path.Length - 4, "-" + i);
+                            }
+                            bmp.Save(newPath);
                             Opacity = 1;
                         }
                     }
+
+
+                    if (this.markersPoints.Count > 0)
+                    {
+                        StreamWriter file = new StreamWriter(path.Replace(".png", ".txt"));
+                        foreach (Marker marker in markersPoints)
+                        {
+                            string line = marker.Id + ". " + marker.Description;
+                            file.WriteLine(line);
+                        }
+                        file.Close();
+                    }
+
                     if (image == imgBig)
                     {
-                        showDialog("Zapis do .png", "Obraz zapisano prawidłowo.");
+                        SimpleDialog simpleDialog = new SimpleDialog("Zapis do .png", "Obraz zapisano prawidłowo.");
+                        simpleDialog.ShowDialog();
                         break;
                     }
                     if (i == 3)
                     {
-                        showDialog("Zapis do .png", "Obrazy zapisano prawidłowo.");
+                        SimpleDialog simpleDialog = new SimpleDialog("Zapis do .png", "Obrazy zapisano prawidłowo.");
+                        simpleDialog.ShowDialog();
                     }
                 }
             }
@@ -445,7 +498,8 @@ namespace EyeStation
              * Segmentacja naczyń krwionośnych
              */
             uncheckedAll();
-            showDialog("Segmentacja", "Segmentacja zakończona powodzeniem.");
+            SimpleDialog simpleDialog = new SimpleDialog("Segmentacja", "Segmentacja zakończona powodzeniem.");
+            simpleDialog.ShowDialog();
         }
 
         private void btnAnalysis_Click(object sender, RoutedEventArgs e)
@@ -456,16 +510,25 @@ namespace EyeStation
              */
             uncheckedAll();
             string result = "Istnieje podejrzenie retinopatii";
-            showDialog("Analiza retinopatii", result);
+            SimpleDialog simpleDialog = new SimpleDialog("Analiza retinopatii", result);
+            simpleDialog.ShowDialog();
         }
 
         private void btnDesription_Click(object sender, RoutedEventArgs e)
         {
             //TO DO:
             /* 
-             * Okno z możliwością edycji treści opisu
+             * Podłączyć pod PACSA
+             * Zmienić "Opis" na rzeczywiste dane
+             * Answer wpisać do DICOMa
              */
             uncheckedAll();
+
+            InputDialog inputDialog = new InputDialog("Edytuj opis badania", "Wprowadź nowy opis aktualnego badania:", "Opis");
+            if (inputDialog.ShowDialog() == true)
+            {
+                //lbl_logo.Content = inputDialog.Answer;
+            }
         }
 
         private void btnReport_Click(object sender, RoutedEventArgs e)
@@ -475,7 +538,8 @@ namespace EyeStation
              * Automatyczne generowanie raportu z badania
              */
             uncheckedAll();
-            showDialog("Raport", "Generowanie raportu zakończone powodzeniem.");
+            SimpleDialog simpleDialog = new SimpleDialog("Raport", "Generowanie raportu zakończone powodzeniem.");
+            simpleDialog.ShowDialog();
         }
 
         private void makeEnableAll()
@@ -490,13 +554,7 @@ namespace EyeStation
             btnAnalysis.IsEnabled = true;
             btnDesription.IsEnabled = true;
             btnReport.IsEnabled = true;
-        }
-
-        private void showDialog(string caption, string message)
-        {
-            MessageBoxButton button = MessageBoxButton.OK;
-            MessageBoxImage icon = MessageBoxImage.Information;
-            MessageBox.Show(message, caption, button, icon);
+            this.markersPoints = new List<Marker>();
         }
 
         private void setSizeOfCanvas()
@@ -526,12 +584,37 @@ namespace EyeStation
             btnAddMarker.IsChecked = false;
         }
 
-        private void clearAllCanvas() {
+        private void clearAllCanvas()
+        {
             cnvBig.Children.Clear();
             cnvSmall.Children.Clear();
             cnvGreen.Children.Clear();
             cnvMask.Children.Clear();
             cnvMaskAndImage.Children.Clear();
+        }
+
+        private string wrapText(int limitInOneLine, string sentence)
+        {
+            string[] words = sentence.Split(' ');
+
+            StringBuilder newSentence = new StringBuilder();
+
+            string line = "";
+            foreach (string word in words)
+            {
+                if ((line + word).Length > limitInOneLine)
+                {
+                    newSentence.AppendLine(line);
+                    line = "";
+                }
+
+                line += string.Format("{0} ", word);
+            }
+
+            if (line.Length > 0)
+                newSentence.AppendLine(line);
+
+            return newSentence.ToString();
         }
     }
 }
