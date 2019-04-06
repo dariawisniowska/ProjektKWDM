@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyeStation", "EyeStation\EyeStation.csproj", "{93CB8B72-A7C8-4368-BC35-67654C40D7F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetinopathyAnalysis", "RetinopathyAnalysis\RetinopathyAnalysis.csproj", "{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RethinopathyAnalysisModule", "RethinopathyAnalysisModule\RethinopathyAnalysisModule.csproj", "{821948D0-C4CA-450A-A853-AF5E0DAA4227}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +23,14 @@ Global
 		{93CB8B72-A7C8-4368-BC35-67654C40D7F9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{93CB8B72-A7C8-4368-BC35-67654C40D7F9}.Release|x64.ActiveCfg = Release|x64
 		{93CB8B72-A7C8-4368-BC35-67654C40D7F9}.Release|x64.Build.0 = Release|x64
-		{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}.Debug|x64.Build.0 = Debug|Any CPU
-		{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}.Release|Any CPU.Build.0 = Release|Any CPU
-		{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}.Release|x64.ActiveCfg = Release|Any CPU
-		{00A1B0F5-4E68-4EC4-816B-9D910BB58D95}.Release|x64.Build.0 = Release|Any CPU
+		{821948D0-C4CA-450A-A853-AF5E0DAA4227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{821948D0-C4CA-450A-A853-AF5E0DAA4227}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{821948D0-C4CA-450A-A853-AF5E0DAA4227}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{821948D0-C4CA-450A-A853-AF5E0DAA4227}.Debug|x64.Build.0 = Debug|Any CPU
+		{821948D0-C4CA-450A-A853-AF5E0DAA4227}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{821948D0-C4CA-450A-A853-AF5E0DAA4227}.Release|Any CPU.Build.0 = Release|Any CPU
+		{821948D0-C4CA-450A-A853-AF5E0DAA4227}.Release|x64.ActiveCfg = Release|Any CPU
+		{821948D0-C4CA-450A-A853-AF5E0DAA4227}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
