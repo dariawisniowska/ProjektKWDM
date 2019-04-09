@@ -1,4 +1,5 @@
 ﻿using EyeStation.VesselSegmentatorFilter;
+using libsvm;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,6 +14,11 @@ namespace VesselSegmentatorFilter
 	/// </summary>
 	public class VesselSegmentator
 	{
+		private readonly int defaultWindowRadius = 7;
+		private readonly int defaultSmallLineLenght = 3;
+		private readonly double defaultThreshold = 2.5;
+		private readonly VesselSegmentatioMethod defaultVesselSegmentatioMethodType = VesselSegmentatioMethod.Both;
+
 		/// <summary>
 		/// Jagged array with pixels values
 		/// </summary>
@@ -67,9 +73,19 @@ namespace VesselSegmentatorFilter
 		int height;
 
 		/// <summary>
+		/// Height of image - property
+		/// </summary>
+		public int Height { get => height; }
+
+		/// <summary>
 		/// Width of image
 		/// </summary>
 		int width;
+
+		/// <summary>
+		/// Width of image - property
+		/// </summary>
+		public int Width { get => width; }
 
 		/// <summary>
 		/// Points pairs list of lines in window
@@ -87,14 +103,9 @@ namespace VesselSegmentatorFilter
 		public SVMFeatures[][] SVMFeaturesMatrix;
 
 		/// <summary>
-		/// Threshold of pixel power level when pixel belongs to vessel or not - field
-		/// </summary>
-		public double threshold;
-
-		/// <summary>
 		/// Threshold of pixel power level when pixel belongs to vessel or not - property
 		/// </summary>
-		public double Threshold { get => threshold; set { threshold = value; Init(); } }
+		public double Threshold;
 
 		/// <summary>
 		/// Type of filtering method
@@ -102,15 +113,32 @@ namespace VesselSegmentatorFilter
 		public VesselSegmentatioMethod VesselSegmentatioMethodType;
 
 		/// <summary>
+		/// libsvm library Support Vector Machine object
+		/// </summary>
+		C_SVC svm;
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public VesselSegmentator()
 		{
-			windowRadius = 7;
-			smallLineLenght = 3;
-			threshold = 2.5;
-			VesselSegmentatioMethodType = VesselSegmentatioMethod.Both;
+			windowRadius = defaultWindowRadius;
+			smallLineLenght = defaultSmallLineLenght;
+			Threshold = defaultThreshold;
+			VesselSegmentatioMethodType = defaultVesselSegmentatioMethodType;
 			Init();
+		}
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="helper">Helper class contains all values for parameters of filter</param>
+		public VesselSegmentator(VesselSegmentatorConstructorHelper helper)
+		{
+			windowRadius = helper.windowRadius ?? defaultWindowRadius;
+			smallLineLenght = helper.smallLineLenght ?? defaultSmallLineLenght;
+			Threshold = helper.Threshold ?? defaultThreshold;
+			VesselSegmentatioMethodType = helper.VesselSegmentatioMethodType ?? defaultVesselSegmentatioMethodType;
 		}
 
 		/// <summary>
@@ -131,6 +159,19 @@ namespace VesselSegmentatorFilter
 			{
 				linePoints.Add(new PointsPair(new Point(-windowRadius, i - windowRadius), new Point(windowRadius, windowRadius - i)));
 			}
+
+			svm = new C_SVC("./vessel_svm");
+		}
+
+		/// <summary>
+		/// Setting image on which filter will work
+		/// </summary>
+		/// <param name="imgPath">Path to input image</param>
+		/// <param name="invert">Flag that decides whether to invert the pixel values ​​of the image</param>
+		/// <param name="canalType">Canal of image to work on</param>
+		public void SetInput(string imgPath, bool invert = true, CanalType canalType = CanalType.GREEN)
+		{
+			SetInput(new Bitmap(imgPath), invert, canalType);
 		}
 
 		/// <summary>
@@ -139,7 +180,7 @@ namespace VesselSegmentatorFilter
 		/// <param name="img">Bitmap input image</param>
 		/// <param name="invert">Flag that decides whether to invert the pixel values ​​of the image</param>
 		/// <param name="canalType">Canal of image to work on</param>
-		public void SetInput(Bitmap img, bool invert, CanalType canalType = CanalType.GREEN)
+		public void SetInput(Bitmap img, bool invert = true, CanalType canalType = CanalType.GREEN)
 		{
 			height = img.Height;
 			width = img.Width;
@@ -212,6 +253,36 @@ namespace VesselSegmentatorFilter
 		}
 
 		/// <summary>
+		/// Calculate parameters for SVM segmentation for one pixel
+		/// </summary>
+		/// <param name="x">x coordinate of pixel</param>
+		/// <param name="y">y coordinate of pixel</param>
+		/// <returns>SVM Input Vector</returns>
+		public SVMFeatures CalculateSVMInputVectorPerPixel(int x, int y)
+		{
+			double averageWindowGrayScale = GetAverageWindowGrayScale(x, y);
+			double largestLineAverageGrayLevel = GetLargestLineAverageGrayLevel(x, y, out double largestSmallLineAverageGrayLevel);
+			double pixelPowerOfMainLine = largestLineAverageGrayLevel - averageWindowGrayScale;
+			return new SVMFeatures
+				(
+					pixelPowerOfMainLine,
+					largestSmallLineAverageGrayLevel - averageWindowGrayScale,
+					canalPixels[y][x]
+				);
+
+		}
+
+		/// <summary>
+		/// Calculate parameters for SVM segmentation for one pixel
+		/// </summary>
+		/// <param name="p">point with pixel coordinates</param>
+		/// <returns>SVM Input Vector</returns>
+		public SVMFeatures CalculateSVMInputVectorPerPixel(Point p)
+		{
+			return CalculateSVMInputVectorPerPixel(p.X, p.Y);
+		}
+
+		/// <summary>
 		/// Calculate parameters for SVM segmentation and filter image by thresholding
 		/// </summary>
 		private void CalculateBothThresholdAndSVM()
@@ -223,13 +294,14 @@ namespace VesselSegmentatorFilter
 					double averageWindowGrayScale = GetAverageWindowGrayScale(j, i);
 					double largestLineAverageGrayLevel = GetLargestLineAverageGrayLevel(j, i, out double largestSmallLineAverageGrayLevel);
 					double pixelPowerOfMainLine = largestLineAverageGrayLevel - averageWindowGrayScale;
-					SVMFeaturesMatrix[i][j] = new SVMFeatures()
-					{
-						PixelGrayLevel = canalPixels[i][j],
-						PixelPowerOfMainLine = pixelPowerOfMainLine,
-						PixelPowerOfSmallLine = largestSmallLineAverageGrayLevel - averageWindowGrayScale
-					};
-					Result[i][j] = pixelPowerOfMainLine > threshold ? byte.MaxValue : byte.MinValue;
+					SVMFeaturesMatrix[i][j] = new SVMFeatures
+					(
+						pixelPowerOfMainLine,
+						largestSmallLineAverageGrayLevel - averageWindowGrayScale,
+						canalPixels[i][j]
+					);
+
+					Result[i][j] = pixelPowerOfMainLine > Threshold ? byte.MaxValue : byte.MinValue;
 				}
 			}
 		}
@@ -245,12 +317,17 @@ namespace VesselSegmentatorFilter
 				{
 					double averageWindowGrayScale = GetAverageWindowGrayScale(j, i);
 					double largestLineAverageGrayLevel = GetLargestLineAverageGrayLevel(j, i, out double largestSmallLineAverageGrayLevel);
-					SVMFeaturesMatrix[i][j] = new SVMFeatures()
-					{
-						PixelGrayLevel = canalPixels[i][j],
-						PixelPowerOfMainLine = largestLineAverageGrayLevel - averageWindowGrayScale,
-						PixelPowerOfSmallLine = largestSmallLineAverageGrayLevel - averageWindowGrayScale
-					};
+					SVMFeaturesMatrix[i][j] = new SVMFeatures
+						(
+							largestLineAverageGrayLevel - averageWindowGrayScale,
+							largestSmallLineAverageGrayLevel - averageWindowGrayScale,
+							canalPixels[i][j]
+						);
+
+					double prediction = svm.Predict(SVMFeaturesMatrix[i][j].ToSVMNodesArray());
+					if (prediction != -1)
+						Console.Write(".");
+					Result[i][j] = prediction == 1 ? byte.MaxValue : byte.MinValue;
 				}
 			}
 		}
@@ -266,7 +343,7 @@ namespace VesselSegmentatorFilter
 				{
 					double averageWindowGrayScale = GetAverageWindowGrayScale(j, i);
 					double largestLineAverageGrayLevel = GetLargestLineAverageGrayLevel(j, i);
-					Result[i][j] = largestLineAverageGrayLevel - averageWindowGrayScale > threshold ? byte.MaxValue : byte.MinValue;
+					Result[i][j] = largestLineAverageGrayLevel - averageWindowGrayScale > Threshold ? byte.MaxValue : byte.MinValue;
 				}
 			}
 		}

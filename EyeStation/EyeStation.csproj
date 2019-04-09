@@ -137,6 +137,7 @@
     <Compile Include="VesselSegmentatorFilter\SVMFeatures.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentatioMethod.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentator.cs" />
+    <Compile Include="VesselSegmentatorFilter\VesselSegmentatorConstructorHelper.cs" />
     <Page Include="CustomDialogs\InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

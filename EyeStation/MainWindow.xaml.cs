@@ -22,6 +22,8 @@ using EyeStation.PACSDAO;
 using EyeStation.CustomDialogs;
 using EyeStation.Models;
 using System.IO;
+using VesselSegmentatorFilter;
+using EyeStation.VesselSegmentatorFilter;
 
 namespace EyeStation
 {
@@ -38,7 +40,12 @@ namespace EyeStation
             serwer = new PACSObj("127.0.0.1", 10100, "KLIENTL", "ARCHIWUM");
             serwer.Connect();
             List<PACSDAO.Patient> data = serwer.data;
-        }
+			vesselSegmentator = new VesselSegmentator()
+			{
+				VesselSegmentatioMethodType = VesselSegmentatioMethod.Thresholding
+			};
+
+		}
         void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Escape)
@@ -54,8 +61,10 @@ namespace EyeStation
         private Line line;
         private Line startLine;
         private Canvas actualCanvas;
+		private VesselSegmentator vesselSegmentator;
 
-        private void btnFourImage_Click(object sender, RoutedEventArgs e)
+
+		private void btnFourImage_Click(object sender, RoutedEventArgs e)
         {
             btnFourImage.Visibility = Visibility.Collapsed;
             btnOneImage.Visibility = Visibility.Visible;
@@ -398,8 +407,16 @@ namespace EyeStation
                 imgBig.Source = new BitmapImage(new Uri(op.FileName));
                 imgSmall.Source = new BitmapImage(new Uri(op.FileName));
                 imgGreen.Source = new BitmapImage(new Uri(op.FileName));
-                imgMask.Source = new BitmapImage(new Uri(op.FileName));
-                imgMaskAndImage.Source = new BitmapImage(new Uri(op.FileName));
+
+				//TEMPORARY
+				//imgMask.Source = new BitmapImage(new Uri(op.FileName));
+				vesselSegmentator.SetInput(new Bitmap(op.FileName));
+				vesselSegmentator.Calculate();
+				var result = BitmapWriter.GetBitmap(vesselSegmentator.Result);
+				imgMask.Source = BitmapWriter.Bitmap2BitmapImage(result);
+
+				//END TEMPORARTY
+				imgMaskAndImage.Source = new BitmapImage(new Uri(op.FileName));
                 makeEnableAll();
                 selectStudyPanel.Visibility = Visibility.Collapsed;
                 mainPanel.Visibility = Visibility.Visible;
