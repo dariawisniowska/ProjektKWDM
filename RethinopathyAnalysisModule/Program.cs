@@ -27,7 +27,7 @@ namespace RethinopathyAnalysisModule
             var path = Environment.CurrentDirectory;
             string DvCPath = System.IO.Path.Combine(path, DvC_TEST_FILE);
             string DvHPath = System.IO.Path.Combine(path, DvH_TEST_FILE);
-            string HvCPath = System.IO.Path.Combine(path, DvC_TEST_FILE);
+            string HvCPath = System.IO.Path.Combine(path, HvC_TEST_FILE);
 
             DvC_prob = ProblemHelper.ReadAndScaleProblem(DvCPath);
             DvH_prob = ProblemHelper.ReadAndScaleProblem(DvHPath);
@@ -36,7 +36,7 @@ namespace RethinopathyAnalysisModule
             var DvCsvm = new C_SVC(DvC_prob, KernelHelper.RadialBasisFunctionKernel(gamma), C);
             var DvHsvm = new C_SVC(DvH_prob, KernelHelper.RadialBasisFunctionKernel(gamma), C);
             var HvCsvm = new C_SVC(HvC_prob, KernelHelper.RadialBasisFunctionKernel(gamma), C);
-
+            
             var DvCcva = DvCsvm.GetCrossValidationAccuracy(5);
             var DvHcva = DvHsvm.GetCrossValidationAccuracy(5);
             var HvCcva = HvCsvm.GetCrossValidationAccuracy(5);
@@ -45,9 +45,11 @@ namespace RethinopathyAnalysisModule
             DvHsvm.Export(System.IO.Path.Combine(path, DvH_MODEL_FILE));
             HvCsvm.Export(System.IO.Path.Combine(path, HvC_MODEL_FILE));
 
-            Console.WriteLine(String.Format("DvC Result: {0}", DvCcva.ToString()));
-            Console.WriteLine(String.Format("DvH Result: {0}", DvHcva.ToString()));
-            Console.WriteLine(String.Format("HvC Result: {0}", HvCcva.ToString()));
+            Console.WriteLine(String.Format("--------------------------"));
+            Console.WriteLine(String.Format("DvC Result: {0}%", (Math.Round(DvCcva*100,2)).ToString()));
+            Console.WriteLine(String.Format("DvH Result: {0}%", (Math.Round(DvHcva * 100,2)).ToString()));
+            Console.WriteLine(String.Format("HvC Result: {0}%", (Math.Round(HvCcva * 100,2)).ToString()));
+            Console.WriteLine(String.Format("--------------------------"));
 
             Console.ReadKey();
         }

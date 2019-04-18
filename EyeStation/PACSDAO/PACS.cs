@@ -168,7 +168,6 @@ namespace EyeStation.PACSDAO
                     continue;
                 }
 
-
                 // przekonwertuj na "znany format"
                 gdcm.Bitmap bmjpeg2000 = ImageConverter.pxmap2jpeg2000(reader.GetPixmap());
                 // przekonwertuj na .NET bitmapy
@@ -182,7 +181,7 @@ namespace EyeStation.PACSDAO
                     {
                         name = String.Format("{0}_slice{1}.jpg", plik.Substring(0, plik.Length - 4), i);
                         Images.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4), i), X[i]);
-                        ImageNames.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4)));
+                        ImageNames.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4),i));
                         Datas.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4), i), dataValues);
                     }
                     else

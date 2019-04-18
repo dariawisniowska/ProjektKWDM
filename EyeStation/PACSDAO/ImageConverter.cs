@@ -13,12 +13,11 @@ namespace EyeStation.PACSDAO
         public static Bitmap[] gdcmBitmap2Bitmap(gdcm.Bitmap bmjpeg2000)
         {
             // przekonwertuj teraz na bitmapę C#
-            uint cols = bmjpeg2000.GetDimension(0);
-            uint rows = bmjpeg2000.GetDimension(1);
-            uint layers = bmjpeg2000.GetDimension(2);
+            uint cols = bmjpeg2000.GetColumns();
+            uint rows = bmjpeg2000.GetRows();
 
             // wartość zwracana - tyle obrazków, ile warstw
-            Bitmap[] ret = new Bitmap[layers];
+            Bitmap[] ret = new Bitmap[1];
 
 
             // bufor
@@ -27,33 +26,38 @@ namespace EyeStation.PACSDAO
                 throw new Exception("błąd pobrania bufora");
 
             // w strumieniu na każdy piksel 2 bajty; tutaj LittleEndian (mnie znaczący bajt wcześniej)
-            for (uint l = 0; l < layers; l++)
-            {
-                Bitmap X = new Bitmap((int)rows, (int)cols);
+
+                Bitmap X = new Bitmap((int)rows/3, (int)cols/3);
+
                 double[,] Y = new double[rows, cols];
                 double m = 0;
+                int stride = (int)cols * 4;
+                int size = (int)rows * stride;
 
-                for (int r = 0; r < rows; r++)
-                    for (int c = 0; c < cols; c++)
+                for (int r = 0; r < bufor.Length - 1; r++)
                     {
-                        // współrzędne w strumieniu
-                        int j = ((int)(l * rows * cols) + (int)(r * cols) + (int)c) * 2;
-                        Y[r, c] = (double)bufor[j + 1] * 256 + (double)bufor[j];
                         // przeskalujemy potem do wartości max.
-                        if (Y[r, c] > m)
-                            m = Y[r, c];
+                        if (bufor[r] * 256 + bufor[r + 1] > m)
+                            m = bufor[r]*256 + bufor[r + 1];
                     }
 
                 // wolniejsza metoda tworzenia bitmapy
-                for (int r = 0; r < rows; r++)
-                    for (int c = 0; c < cols; c++)
+                for (int r = 0; r < rows/3; r++)
+                    for (int c = 0; c < cols/3; c++)
                     {
-                        int f = (int)(255 * (Y[r, c] / m));
-                        X.SetPixel(r, c, Color.FromArgb(f, f, f));
+                        int index = c*3 * stride + 3 * r*3;
+
+                        if (index + 2 < bufor.Length)
+                        {
+                            int red = (int)(255 * (bufor[index]*256 + bufor[index + 1]) / m);
+                            int green = (int)(255 * (bufor[index + 1] * 256 + bufor[index + 2]) / m);
+                            int blue = (int)(255 * (bufor[index + 2] * 256 + bufor[index + 3]) / m);
+                            X.SetPixel(r, c, Color.FromArgb(red, green, blue));
+                        }
                     }
                 // kolejna bitmapa
-                ret[l] = X;
-            }
+                ret[0] = X;
+
             return ret;
         }
 
