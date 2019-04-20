@@ -16,7 +16,7 @@ namespace EyeStation.PACSDAO
             {
                 // Use ProcessStartInfo class
                 ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.CreateNoWindow = false;
+                startInfo.CreateNoWindow = true;
                 startInfo.UseShellExecute = false;
                 startInfo.FileName = "dcm2jpg.exe";
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
