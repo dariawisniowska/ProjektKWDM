@@ -10,18 +10,16 @@ namespace EyeStation.PACSDAO
     {
         public string patientID;
         public string patientName;
-        public List<string> imagesNames;
-        public Dictionary<string, System.Drawing.Image> images;
+        public string name;
         public Dictionary<string, Dictionary<string, string>> datas;
         public string path;
 
-        public Patient(string patientID, string patientName, List<string> imagesNames, Dictionary<string, System.Drawing.Image> images, string path, Dictionary<string, Dictionary<string, string>> datas)
+        public Patient(string patientID, string patientName, string name, string path, Dictionary<string, Dictionary<string, string>> datas)
         {
             this.path = path;
             this.patientID = patientID;
+            this.name = name;
             this.patientName = patientName;
-            this.images = images;
-            this.imagesNames = imagesNames;
             this.datas = datas;
         }
     }

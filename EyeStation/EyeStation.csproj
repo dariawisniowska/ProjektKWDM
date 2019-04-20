@@ -127,6 +127,7 @@
     </Compile>
     <Compile Include="Models\Marker.cs" />
     <Compile Include="Models\Study.cs" />
+    <Compile Include="PACSDAO\DCMTK.cs" />
     <Compile Include="PACSDAO\ImageConverter.cs" />
     <Compile Include="PACSDAO\PACS.cs" />
     <Compile Include="PACSDAO\Patient.cs" />

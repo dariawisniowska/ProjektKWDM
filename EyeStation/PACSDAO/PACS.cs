@@ -45,16 +45,13 @@ namespace EyeStation.PACSDAO
         {
             List<EyeStation.Model.Study> studies = new List<EyeStation.Model.Study>();
             foreach (Patient p in data)
-            {
-                foreach (string name in p.imagesNames)
-                {
-                    string path = System.IO.Directory.GetCurrentDirectory() + name.Remove(0, 1)+".jpg";
-                    string klucz = name.Replace("\\", "\\\\");
+            {               
+                    string path = System.IO.Directory.GetCurrentDirectory() + p.name.Remove(0, 1)+".jpg";
+                    string klucz = p.name.Replace("\\", "\\\\");
                     Dictionary<string,string> dict = p.datas[klucz];
                     string desc = dict["(0008,1080)"];
                     if (desc == "0") desc = "-";
-                    studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, desc, p.images[name], path));
-                }
+                    studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, desc, path));
             }
             return studies;
         }
@@ -62,24 +59,27 @@ namespace EyeStation.PACSDAO
         private void GetData()
         {
             gdcm.DataSetArrayType wynik = PatientQuery();
+            List<string> ex1 = new List<string>();
             // pokaż wyniki
             foreach (gdcm.DataSet x in wynik)
             {
                 EyeStation.PACSDAO.PatientDataReader de = new EyeStation.PACSDAO.PatientDataReader(x.toString());
 
                 string dane;
-                Dictionary<string, System.Drawing.Image> Images;
-                List<string> ImageNames;
+                string name;
                 Dictionary<string, Dictionary<string, string>> Datas;
 
-                FramesQuery(de.PatientID, out dane, out Images, out ImageNames, out Datas);
-  
+                FramesQuery(de.PatientID, out dane, out name, out Datas);
 
-                data.Add(new PACSDAO.Patient(de.PatientID, de.PatientName, ImageNames, Images, dane, Datas));
+
+                data.Add(new PACSDAO.Patient(de.PatientID, de.PatientName, name, dane, Datas));
+                ex1.Add(String.Format("{0}", name));
+             
             }
+            DCMTK.DCM2JPG(ex1);
         }
       
-        private void FramesQuery(string PatientId, out string dane, out Dictionary<string, System.Drawing.Image> Images, out List<string> ImageNames, out Dictionary<string, Dictionary<string, string>> Datas)
+        private void FramesQuery(string PatientId, out string dane, out string name, out Dictionary<string, Dictionary<string, string>> Datas)
         {
 
             gdcm.ERootType typ = gdcm.ERootType.ePatientRootType;
@@ -117,8 +117,7 @@ namespace EyeStation.PACSDAO
                 MessageBox.Show("PACS server doesn't work.", "Error");
             }
             // skasowanie listy zdjęć
-            Images = new Dictionary<string, System.Drawing.Image>();
-            ImageNames = new List<string>();
+            name = "";
             Datas = new Dictionary<string, Dictionary<string, string>>();
 
             List<string> pliki = new List<string>(System.IO.Directory.EnumerateFiles(dane));  //nazwy plikow
@@ -168,32 +167,11 @@ namespace EyeStation.PACSDAO
                     continue;
                 }
 
-                // przekonwertuj na "znany format"
-                gdcm.Bitmap bmjpeg2000 = ImageConverter.pxmap2jpeg2000(reader.GetPixmap());
-                // przekonwertuj na .NET bitmapy
-                System.Drawing.Bitmap[] X = ImageConverter.gdcmBitmap2Bitmap(bmjpeg2000);
-
-                // zapisz
-                for (int i = 0; i < X.Length; i++)
-                {
-                    String name = "";
-                    if (X.Length > 1)
-                    {
-                        name = String.Format("{0}_slice{1}.jpg", plik.Substring(0, plik.Length - 4), i);
-                        Images.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4), i), X[i]);
-                        ImageNames.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4),i));
-                        Datas.Add(String.Format("{0}_slice{1}", plik.Substring(0, plik.Length - 4), i), dataValues);
-                    }
-                    else
-                    {
-                        name = String.Format("{0}.jpg", plik.Substring(0,plik.Length-4));
-                        Images.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)), X[i]);
-                        ImageNames.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)));
-                        Datas.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)).Replace("\\","\\\\"), dataValues);
-                    }
-
-                    X[i].Save(name);
-                }
+              
+                    name = String.Format("{0}", plik.Substring(0,plik.Length-4));
+                    Datas.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)).Replace("\\","\\\\"), dataValues);
+                
+                
             }
         }
 

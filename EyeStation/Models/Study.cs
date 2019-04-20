@@ -19,17 +19,22 @@ namespace EyeStation.Model
         public string Name { get; set; }
 
         public string Description { get; set; }
-
-        public Image Image { get; set; }
-
+        
         public BitmapImage ImageSource { get; set; }
 
-        public Study(string id, string name, string description, Image image, string filePath)
+        public Study(string id, string name, string description,  string filePath)
         {
             this.Id = id;
             this.Name = name;
             this.Description = description;
-            this.ImageSource = new BitmapImage(new Uri(filePath));
+            try
+            {
+                this.ImageSource = new BitmapImage(new Uri(filePath));
+            }
+            catch
+            {
+                this.ImageSource = null;
+            }
         }        
     }
 }
