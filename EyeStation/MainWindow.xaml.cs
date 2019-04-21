@@ -343,18 +343,11 @@ namespace EyeStation
 
         private void btnGetImage_Click(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Połączenie z serwerem i wyświetlenie rzeczywistych danych
-             */
             uncheckedAll();
             selectStudyPanel.Visibility = Visibility.Visible;
             mainPanel.Visibility = Visibility.Collapsed;
 
             List<Study> items = new List<Study>();
-            //for (int i = 0; i<25; i++)
-            //    items.Add(new Study() { Id = i, Name = "Jan Kowalski", Description = "Opis"});
-
             items = serwer.GetStudies();
 
             lvStudy.ItemsSource = items;
@@ -533,18 +526,25 @@ namespace EyeStation
 
         private void btnDesription_Click(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Podłączyć pod PACSA
-             * Zmienić "Opis" na rzeczywiste dane
-             * Answer wpisać do DICOMa
-             */
             uncheckedAll();
-
-            InputDialog inputDialog = new InputDialog("Edytuj opis badania", "Wprowadź nowy opis aktualnego badania:", "Opis");
+            int index = lvStudy.SelectedIndex;
+            Study study = (Study)lvStudy.SelectedItems[0];
+            string aktualnyOpis = study.Description;
+            InputDialog inputDialog = new InputDialog("Edytuj opis badania", "Wprowadź nowy opis aktualnego badania:", aktualnyOpis);
             if (inputDialog.ShowDialog() == true)
             {
                 //lbl_logo.Content = inputDialog.Answer;
+                SimpleDialog simpleDialog = new SimpleDialog("","");
+                if(Study.EditStudy(serwer, (Study)lvStudy.SelectedItems[0], "8,1080", inputDialog.Answer))
+                {
+                    simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie opisu zakończone powodzeniem.");
+                    lvStudy.ItemsSource = serwer.GetStudies();
+                    lvStudy.SelectedIndex = index;
+                }
+                else
+                    simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie opisu nie powiodło się.");
+                
+                simpleDialog.ShowDialog();
             }
         }
 

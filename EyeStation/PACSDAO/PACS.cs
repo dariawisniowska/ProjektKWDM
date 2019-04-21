@@ -43,10 +43,11 @@ namespace EyeStation.PACSDAO
 
         public List<EyeStation.Model.Study> GetStudies()
         {
+            GetData();
             List<EyeStation.Model.Study> studies = new List<EyeStation.Model.Study>();
             foreach (Patient p in data)
             {               
-                    string path = System.IO.Directory.GetCurrentDirectory() + p.name.Remove(0, 1)+".jpg";
+                    string path = System.IO.Directory.GetCurrentDirectory() + p.name.Remove(0, 1);
                     string klucz = p.name.Replace("\\", "\\\\");
                     Dictionary<string,string> dict = p.datas[klucz];
                     string desc = dict["(0008,1080)"];
@@ -56,8 +57,17 @@ namespace EyeStation.PACSDAO
             return studies;
         }
 
+        public bool Store(string path)
+        {            
+            gdcm.FilenamesType pliki = new gdcm.FilenamesType();
+            pliki.Add(path);
+            bool stan = gdcm.CompositeNetworkFunctions.CStore(ip, port, pliki, aet, call);
+            return stan;
+        }
+
         private void GetData()
         {
+            data.Clear();
             gdcm.DataSetArrayType wynik = PatientQuery();
             List<string> ex1 = new List<string>();
             // pokaż wyniki
@@ -70,15 +80,14 @@ namespace EyeStation.PACSDAO
                 Dictionary<string, Dictionary<string, string>> Datas;
 
                 FramesQuery(de.PatientID, out dane, out name, out Datas);
-
-
+                
                 data.Add(new PACSDAO.Patient(de.PatientID, de.PatientName, name, dane, Datas));
                 ex1.Add(String.Format("{0}", name));
              
             }
             DCMTK.DCM2JPG(ex1);
         }
-      
+
         private void FramesQuery(string PatientId, out string dane, out string name, out Dictionary<string, Dictionary<string, string>> Datas)
         {
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EyeStation.PACSDAO;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -18,6 +19,8 @@ namespace EyeStation.Model
 
         public string Name { get; set; }
 
+        public string FilePath { get; set; }
+
         public string Description { get; set; }
         
         public BitmapImage ImageSource { get; set; }
@@ -26,15 +29,27 @@ namespace EyeStation.Model
         {
             this.Id = id;
             this.Name = name;
+            this.FilePath = filePath;
             this.Description = description;
             try
             {
-                this.ImageSource = new BitmapImage(new Uri(filePath));
+                this.ImageSource = new BitmapImage(new Uri(filePath+".jpg"));
             }
             catch
             {
                 this.ImageSource = null;
             }
-        }        
+        }
+
+        public static bool EditStudy(PACSObj serwer, EyeStation.Model.Study studyToEdit, string tag, string value)
+        {
+            //Zmiana DICOMA
+            DCMTK.GDCMANON(studyToEdit.FilePath, tag, value);
+            //Zapis do PACS
+            bool result = serwer.Store(studyToEdit.FilePath+".dcm");
+
+            return result;
+        }
+
     }
 }
