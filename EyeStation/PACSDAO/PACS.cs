@@ -52,7 +52,32 @@ namespace EyeStation.PACSDAO
                     Dictionary<string,string> dict = p.datas[klucz];
                     string desc = dict["(0008,1080)"];
                     if (desc == "0") desc = "-";
-                    studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, desc, path));
+
+                    string angles = "-";
+                    try
+                    {
+                        angles = dict["(0008,1030)"];
+                        if (angles == "0") angles = "-";
+                    }
+                    catch { }
+
+                    string lengths = "-";
+                    try
+                    {
+                        lengths = dict["(0010,4000)"];
+                        if (lengths == "0") lengths = "-";
+                    }
+                    catch { }
+
+                    string markers = "-";
+                    try
+                    {
+                        markers = dict["(0020,4000)"];
+                        if (markers == "0") markers = "-";
+                    }
+                catch { }
+
+                studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, desc, angles, lengths, markers, path));
             }
             return studies;
         }

@@ -535,7 +535,7 @@ namespace EyeStation
             {
                 //lbl_logo.Content = inputDialog.Answer;
                 SimpleDialog simpleDialog = new SimpleDialog("","");
-                if(Study.EditStudy(serwer, (Study)lvStudy.SelectedItems[0], "8,1080", inputDialog.Answer))
+                if (Study.EditDescription(serwer, (Study)lvStudy.SelectedItems[0], inputDialog.Answer))
                 {
                     simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie opisu zakończone powodzeniem.");
                     lvStudy.ItemsSource = serwer.GetStudies();
