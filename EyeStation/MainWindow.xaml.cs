@@ -33,19 +33,22 @@ namespace EyeStation
     public partial class MainWindow : Window
     {
         public PACSObj serwer;
-       
+
         public MainWindow()
         {
             InitializeComponent();
             serwer = new PACSObj("127.0.0.1", 10100, "KLIENTL", "ARCHIWUM");
             serwer.Connect();
             List<PACSDAO.Patient> data = serwer.data;
-			vesselSegmentator = new VesselSegmentator()
-			{
-				VesselSegmentatioMethodType = VesselSegmentatioMethod.Thresholding
-			};
+            vesselSegmentator = new VesselSegmentator()
+            {
+                VesselSegmentatioMethodType = VesselSegmentatioMethod.Thresholding
+            };
+            List<Study> items = new List<Study>();
+            items = serwer.GetStudies();
+            lvStudy.ItemsSource = items;
 
-		}
+        }
         void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Escape)
@@ -61,10 +64,10 @@ namespace EyeStation
         private Line line;
         private Line startLine;
         private Canvas actualCanvas;
-		private VesselSegmentator vesselSegmentator;
+        private VesselSegmentator vesselSegmentator;
+        private BitmapImage imageSource;
 
-
-		private void btnFourImage_Click(object sender, RoutedEventArgs e)
+        private void btnFourImage_Click(object sender, RoutedEventArgs e)
         {
             btnFourImage.Visibility = Visibility.Collapsed;
             btnOneImage.Visibility = Visibility.Visible;
@@ -89,8 +92,6 @@ namespace EyeStation
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
 
-            setSizeOfCanvas();
-
             this.isMeasureTool = true;
             this.measurePoints = new List<Point>();
         }
@@ -104,9 +105,8 @@ namespace EyeStation
             }
             else if (this.measurePoints.Count > 1)
             {
-                BitmapImage bmp = (BitmapImage)imgBig.Source;
-                int srcHeight = bmp.PixelHeight;
-                double actualHeight = imgBig.ActualHeight;
+                int srcHeight = imageSource.PixelHeight;
+                double actualHeight = cnvBig.ActualHeight;
                 double pixelSize = 1;
 
                 TextBlock textBlock = MeasureTool.getLengthOfActiveLine(this.measurePoints, srcHeight, actualHeight, pixelSize);
@@ -121,8 +121,6 @@ namespace EyeStation
             btnSelect.IsChecked = false;
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
-
-            setSizeOfCanvas();
 
             this.isAngleTool = true;
             this.anglePoints = new List<Point>();
@@ -166,13 +164,12 @@ namespace EyeStation
                     }
                     else
                     {
-                        BitmapImage bmp = (BitmapImage)imgBig.Source;
-                        int srcHeight = bmp.PixelHeight;
+                        int srcHeight = this.imageSource.PixelHeight;
                         double actualHeight = 0;
                         if (cnv == cnvBig)
-                            actualHeight = imgBig.ActualHeight;
+                            actualHeight = cnvBig.ActualHeight;
                         else
-                            actualHeight = imgSmall.ActualHeight;
+                            actualHeight = cnvSmall.ActualHeight;
                         double pixelSize = 1;
                         if (e.ClickCount == 2 && this.actualCanvas == cnv)
                         {
@@ -249,7 +246,7 @@ namespace EyeStation
             {
                 Point point = e.GetPosition(cnv);
 
-                InputDialog inputDialog = new InputDialog("Nowy znacznik", "Wprowadź opis dle wskazanego znacznika:", "");
+                InputDialog inputDialog = new InputDialog("Nowy znacznik", "Wprowadź opis dla wskazanego znacznika:", "");
                 if (inputDialog.ShowDialog() == true && inputDialog.Answer != null && inputDialog.Answer != "")
                 {
                     Ellipse elipse = MeasureTool.createMarker(point);
@@ -286,8 +283,6 @@ namespace EyeStation
             btnAngle.IsChecked = false;
             btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
-
-            setSizeOfCanvas();
         }
         private void btnSelect_Unchecked(object sender, RoutedEventArgs e)
         {
@@ -308,8 +303,6 @@ namespace EyeStation
             btnAngle.IsChecked = false;
             btnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
-
-            setSizeOfCanvas();
         }
 
         private void btnUnSelect_Unchecked(object sender, RoutedEventArgs e)
@@ -322,17 +315,11 @@ namespace EyeStation
 
         private void btnAddMarker_Checked(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Manualne dodanie znacznika na obrazie (wysegmentowanym?)
-             */
-
             btnMeasure.IsChecked = false;
             btnAngle.IsChecked = false;
             btnSelect.IsChecked = false;
             btnUnSelect.IsChecked = false;
 
-            setSizeOfCanvas();
             this.isMarkerTool = true;
         }
 
@@ -343,38 +330,42 @@ namespace EyeStation
 
         private void btnGetImage_Click(object sender, RoutedEventArgs e)
         {
-            uncheckedAll();
             selectStudyPanel.Visibility = Visibility.Visible;
             mainPanel.Visibility = Visibility.Collapsed;
-
-            List<Study> items = new List<Study>();
-            items = serwer.GetStudies();
-
-            lvStudy.ItemsSource = items;
         }
 
         private void lvStudy_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Wyświetlenie odpowiedniego obrazu
-             */
             if (lvStudy.SelectedItems.Count != 0)
             {
                 Study study = (Study)lvStudy.SelectedItems[0];
 
-                makeEnableAll();
+                try
+                {
+                    displayImage(new BitmapImage(study.ImageSource.UriSource));
 
-                selectStudyPanel.Visibility = Visibility.Collapsed;
-                mainPanel.Visibility = Visibility.Visible;
-                makeEnableAll();
-
-                imgBig.Source = study.ImageSource;
-                imgSmall.Source = study.ImageSource;
-                imgGreen.Source = study.ImageSource;
-                imgMask.Source = study.ImageSource;
-                imgMaskAndImage.Source = study.ImageSource;
-                clearAllCanvas();
+                    btnBack.Visibility = Visibility.Visible;
+                    selectStudyPanel.Visibility = Visibility.Collapsed;
+                    mainPanel.Visibility = Visibility.Visible;
+                    makeEnableAll();
+                    setSizeOfCanvas();
+                    clearAllCanvas();
+                    uncheckedAll();
+                }
+                catch(NullReferenceException ex)
+                {
+                    SimpleDialog simpleDialog = new SimpleDialog("Brak obrazu", "Plik DICOM nie posiada danych obrazowych. Wybierz inne badanie.");
+                    simpleDialog.ShowDialog();
+                    selectStudyPanel.Visibility = Visibility.Visible;
+                    mainPanel.Visibility = Visibility.Collapsed;
+                }
+                catch (Exception ex)
+                {
+                    SimpleDialog simpleDialog = new SimpleDialog("Błąd", "Nieoczekiwany błąd. Wybierz inne badanie.");
+                    simpleDialog.ShowDialog();
+                    selectStudyPanel.Visibility = Visibility.Visible;
+                    mainPanel.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
@@ -387,34 +378,23 @@ namespace EyeStation
 
         private void btnAddImage_Click(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Dodanie dicoma do pacsa
-             */
             uncheckedAll();
             OpenFileDialog op = new OpenFileDialog();
             op.Title = "Wybierz plik DICOM";
-            //op.Filter = "DICOM (*.dcm;*.vtk)|*.dcm;*.vtk";
+            op.Filter = "DICOM (*.dcm;*.vtk)|*.dcm;*.vtk";
             if (op.ShowDialog() == true)
             {
-                imgBig.Source = new BitmapImage(new Uri(op.FileName));
-                imgSmall.Source = new BitmapImage(new Uri(op.FileName));
-                imgGreen.Source = new BitmapImage(new Uri(op.FileName));
+                serwer.Store(op.FileName);
 
-				//TEMPORARY
-				//imgMask.Source = new BitmapImage(new Uri(op.FileName));
-				vesselSegmentator.SetInput(new Bitmap(op.FileName));
-				vesselSegmentator.Calculate();
-				var result = BitmapWriter.GetBitmap(vesselSegmentator.Result);
-				imgMask.Source = BitmapWriter.Bitmap2BitmapImage(result);
+                List<Study> items = new List<Study>();
+                items = serwer.GetStudies();
+                lvStudy.ItemsSource = items;
 
-				//END TEMPORARTY
-				imgMaskAndImage.Source = new BitmapImage(new Uri(op.FileName));
-                makeEnableAll();
-                selectStudyPanel.Visibility = Visibility.Collapsed;
-                mainPanel.Visibility = Visibility.Visible;
+                SimpleDialog simpleDialog = new SimpleDialog("Nowy plik", "Plik został dodany prawidłowo.");
 
-                clearAllCanvas();
+                simpleDialog.ShowDialog();
+
+                lvStudy.SelectedItem = items[items.Count - 1];
             }
         }
 
@@ -427,89 +407,22 @@ namespace EyeStation
             {
                 path = sfd.FileName;
 
-                System.Windows.Controls.Image image = null;
-                for (int i = 0; i < 4; i++)
+                saveImagesToPng(path);
+
+                if (this.markersPoints.Count > 0)
                 {
-                    if (btnOneImage.Visibility == Visibility.Collapsed)
+                    StreamWriter file = new StreamWriter(path.Replace(".png", ".txt"));
+                    foreach (Marker marker in markersPoints)
                     {
-                        image = imgBig;
+                        string line = marker.Id + ". " + marker.Description;
+                        file.WriteLine(line);
                     }
-                    else
-                    {
-                        switch (i)
-                        {
-                            case 0:
-                                image = imgSmall;
-                                break;
-                            case 1:
-                                image = imgGreen;
-                                break;
-                            case 2:
-                                image = imgMask;
-                                break;
-                            case 3:
-                                image = imgMaskAndImage;
-                                break;
-                        }
-                    }
-                    double width = image.ActualWidth;
-                    double height = image.ActualHeight;
-
-                    Point relativePoint = image.TransformToAncestor(Application.Current.MainWindow)
-                                  .Transform(new Point(0, 0));
-                    using (Bitmap bmp = new Bitmap((int)width,
-                        (int)height))
-                    {
-                        using (Graphics g = Graphics.FromImage(bmp))
-                        {
-                            Opacity = .0;
-                            g.CopyFromScreen((int)relativePoint.X, (int)relativePoint.Y, 0, 0, bmp.Size);
-                            string newPath = path;
-                            if (image != imgBig)
-                            {
-                                newPath = path.Insert(path.Length - 4, "-" + i);
-                            }
-                            bmp.Save(newPath);
-                            Opacity = 1;
-                        }
-                    }
-
-
-                    if (this.markersPoints.Count > 0)
-                    {
-                        StreamWriter file = new StreamWriter(path.Replace(".png", ".txt"));
-                        foreach (Marker marker in markersPoints)
-                        {
-                            string line = marker.Id + ". " + marker.Description;
-                            file.WriteLine(line);
-                        }
-                        file.Close();
-                    }
-
-                    if (image == imgBig)
-                    {
-                        SimpleDialog simpleDialog = new SimpleDialog("Zapis do .png", "Obraz zapisano prawidłowo.");
-                        simpleDialog.ShowDialog();
-                        break;
-                    }
-                    if (i == 3)
-                    {
-                        SimpleDialog simpleDialog = new SimpleDialog("Zapis do .png", "Obrazy zapisano prawidłowo.");
-                        simpleDialog.ShowDialog();
-                    }
+                    file.Close();
                 }
-            }
-        }
 
-        private void btnSegmentation_Click(object sender, RoutedEventArgs e)
-        {
-            //TO DO:
-            /* 
-             * Segmentacja naczyń krwionośnych
-             */
-            uncheckedAll();
-            SimpleDialog simpleDialog = new SimpleDialog("Segmentacja", "Segmentacja zakończona powodzeniem.");
-            simpleDialog.ShowDialog();
+                SimpleDialog simpleDialog = new SimpleDialog("Zapis do .png", "Obrazy zapisano prawidłowo.");
+                simpleDialog.ShowDialog();
+            }
         }
 
         private void btnAnalysis_Click(object sender, RoutedEventArgs e)
@@ -533,8 +446,7 @@ namespace EyeStation
             InputDialog inputDialog = new InputDialog("Edytuj opis badania", "Wprowadź nowy opis aktualnego badania:", aktualnyOpis);
             if (inputDialog.ShowDialog() == true)
             {
-                //lbl_logo.Content = inputDialog.Answer;
-                SimpleDialog simpleDialog = new SimpleDialog("","");
+                SimpleDialog simpleDialog = new SimpleDialog("", "");
                 if (Study.EditDescription(serwer, (Study)lvStudy.SelectedItems[0], inputDialog.Answer))
                 {
                     simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie opisu zakończone powodzeniem.");
@@ -543,7 +455,7 @@ namespace EyeStation
                 }
                 else
                     simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie opisu nie powiodło się.");
-                
+
                 simpleDialog.ShowDialog();
             }
         }
@@ -559,6 +471,12 @@ namespace EyeStation
             simpleDialog.ShowDialog();
         }
 
+        private void btnBackToImage_Click(object sender, RoutedEventArgs e)
+        {
+            selectStudyPanel.Visibility = Visibility.Collapsed;
+            mainPanel.Visibility = Visibility.Visible;
+        }
+
         private void makeEnableAll()
         {
             btnMeasure.IsEnabled = true;
@@ -567,7 +485,6 @@ namespace EyeStation
             btnUnSelect.IsEnabled = true;
             btnAddMarker.IsEnabled = true;
             btnSaveImage.IsEnabled = true;
-            btnSegmentation.IsEnabled = true;
             btnAnalysis.IsEnabled = true;
             btnDesription.IsEnabled = true;
             btnReport.IsEnabled = true;
@@ -576,20 +493,19 @@ namespace EyeStation
 
         private void setSizeOfCanvas()
         {
-            cnvBig.Height = imgBig.ActualHeight;
-            cnvBig.Width = imgBig.ActualWidth;
-
-            cnvSmall.Height = imgSmall.ActualHeight;
-            cnvSmall.Width = imgSmall.ActualWidth;
-
-            cnvGreen.Height = imgGreen.ActualHeight;
-            cnvGreen.Width = imgGreen.ActualWidth;
-
-            cnvMask.Height = imgMask.ActualHeight;
-            cnvMask.Width = imgMask.ActualWidth;
-
-            cnvMaskAndImage.Height = imgMaskAndImage.ActualHeight;
-            cnvMaskAndImage.Width = imgMaskAndImage.ActualWidth;
+            double actualHeight = gridCanvas.ActualHeight;
+            cnvBig.Height = actualHeight;
+            cnvBig.Width = imageSource.PixelWidth * actualHeight / imageSource.PixelHeight;
+            double smallHeight = actualHeight / 2 - 30;
+            double smallWidth = imageSource.PixelWidth * (actualHeight / 2) / imageSource.PixelHeight - 30;
+            cnvSmall.Height = smallHeight;
+            cnvSmall.Width = smallWidth;
+            cnvGreen.Height = smallHeight;
+            cnvGreen.Width = smallWidth;
+            cnvMask.Height = smallHeight;
+            cnvMask.Width = smallWidth;
+            cnvMaskAndImage.Height = smallHeight;
+            cnvMaskAndImage.Width = smallWidth;
         }
 
         private void uncheckedAll()
@@ -632,6 +548,82 @@ namespace EyeStation
                 newSentence.AppendLine(line);
 
             return newSentence.ToString();
+        }
+
+        private void saveImagesToPng(string path)
+        {
+            int gridHeight = (int)gridCanvas.RenderSize.Height;
+            int gridWidth = (int)gridCanvas.RenderSize.Width;
+            int cnvHeight = gridHeight / 2 - 30;
+            int cnvWidth = (int)imageSource.PixelWidth * cnvHeight / imageSource.PixelHeight;
+
+            string newPath = "";
+            for (int i = 0; i < 4; i++)
+            {
+                int positionX = 0;
+                int positionY = 0;
+                RenderTargetBitmap rtb = new RenderTargetBitmap(gridWidth, gridHeight, 96d, 96d, System.Windows.Media.PixelFormats.Default);
+                newPath = path.Insert(path.Length - 4, "-" + i);
+                positionX = Convert.ToInt32((gridWidth / 2 - cnvWidth) / 2);
+                switch (i)
+                {
+                    case 0:
+                        rtb.Render(cnvSmall);
+                        break;
+                    case 1:
+                        positionX += gridWidth / 2;
+                        rtb.Render(cnvGreen);
+                        break;
+                    case 2:
+                        positionY += gridHeight / 2;
+                        rtb.Render(cnvMask);
+                        break;
+                    case 3:
+                        positionX += gridWidth / 2;
+                        positionY += gridHeight / 2;
+                        rtb.Render(cnvMaskAndImage);
+                        break;
+                }
+
+                var crop = new CroppedBitmap(rtb, new Int32Rect(positionX, positionY, cnvWidth, cnvHeight));
+
+                BitmapEncoder pngEncoder = new PngBitmapEncoder();
+                pngEncoder.Frames.Add(BitmapFrame.Create(crop));
+
+                using (var fs = System.IO.File.OpenWrite(newPath))
+                {
+                    pngEncoder.Save(fs);
+                }
+
+            }
+
+        }
+
+        private void displayImage(BitmapImage image)
+        {
+            ImageBrush ib = new ImageBrush();
+            this.imageSource = image;
+            ib.ImageSource = imageSource;
+            cnvBig.Background = ib;
+
+            cnvSmall.Background = ib;
+
+            vesselSegmentator.SetInput(BitmapWriter.BitmapImage2Bitmap(image));
+            var greenCanal = BitmapWriter.GetBitmap(vesselSegmentator.CanalPixels);
+            ImageBrush ibGreen = new ImageBrush();
+            ibGreen.ImageSource = BitmapWriter.Bitmap2BitmapImage(greenCanal);
+            cnvGreen.Background = ibGreen;
+
+            cnvMaskAndImage.Background = ib;
+            //TEMPORARY
+            vesselSegmentator.SetInput(BitmapWriter.BitmapImage2Bitmap(image));
+            vesselSegmentator.Calculate();
+            var result = BitmapWriter.GetBitmap(vesselSegmentator.Result);
+            ImageBrush ibMask = new ImageBrush();
+            ibMask.ImageSource = BitmapWriter.Bitmap2BitmapImage(result);
+            cnvMask.Background = ibMask;
+
+            //END TEMPORARTY
         }
     }
 }

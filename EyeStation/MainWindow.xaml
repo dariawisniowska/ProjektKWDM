@@ -142,7 +142,8 @@
                     ToolTip="Zmień widok"
                     Margin="10,0,10,0"
                     x:Name="btnFourImage"
-                    Click="btnFourImage_Click">
+                    Click="btnFourImage_Click"
+                    Visibility="Collapsed">
                     <materialDesign:PackIcon
                         Kind="BorderAll"
                         Height="24"
@@ -154,7 +155,6 @@
                     ToolTip="Zmień widok"
                     Margin="10,0,10,0"
                     x:Name="btnOneImage"
-                    Visibility="Collapsed"
                     Click="btnOneImage_Click">
                     <materialDesign:PackIcon
                         Kind="BorderAllVariant"
@@ -221,23 +221,6 @@
                     Height="40"
                     materialDesign:ShadowAssist.ShadowDepth="Depth3" 
                     Margin="0 20 0 0"
-                    x:Name="btnSegmentation"
-                    IsEnabled="False" Click="btnSegmentation_Click">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <materialDesign:PackIcon
-                            Kind="VectorPolyline"
-                            Height="24"
-                            Width="24" />
-                        <Label Foreground="#000000">Segmentuj naczynia krwionośne</Label>
-                    </StackPanel>
-                </Button>
-
-                <Button
-                    Style="{StaticResource MaterialDesignRaisedLightButton}"
-                    Width="270"
-                    Height="40"
-                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
-                    Margin="0 20 0 0"
                     x:Name="btnAnalysis"
                     IsEnabled="False" Click="btnAnalysis_Click">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -262,7 +245,7 @@
                             Kind="SquareEditOutline"
                             Height="24"
                             Width="24" />
-                        <Label Foreground="#000000">Edytuj opis badania</Label>
+                        <Label Foreground="#000000">Wyświetl opis badania</Label>
                     </StackPanel>
                 </Button>
 
@@ -285,7 +268,7 @@
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" Grid.Column="1">
-            <Grid x:Name="mainPanel" Visibility="Visible">
+            <Grid x:Name="mainPanel" Visibility="Hidden">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="45" />
                     <RowDefinition Height="*" />
@@ -318,122 +301,101 @@
                         Margin="10 15 0 0">
                     </Slider>
                 </Grid>
-                <Grid Grid.Row="1" x:Name="gridOneImage" Visibility="Visible" Margin = "20 0 30 30">
-                    <Image VerticalAlignment = "Top" 
-                           HorizontalAlignment="Center"
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="HighQuality"
-                           Grid.Row="0"
-                           x:Name="imgBig"
-                           >
-
-                    </Image>
-                    <Canvas x:Name ="cnvBig" 
-                            Background="Transparent"
+                <Grid Grid.Row="1" x:Name="gridCanvas" Margin = "20 0 30 30">
+                    <Grid x:Name="gridOneImage" Visibility="Collapsed">
+                        <Canvas x:Name ="cnvBig" 
                             MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="0"
-                            VerticalAlignment = "Top" 
-                            HorizontalAlignment="Center"/>
-                </Grid>
-                <Grid Grid.Row="1" x:Name="gridFourImage" Visibility="Collapsed" Margin = "10 20 20 20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Image VerticalAlignment = "Top" 
-                           Margin = "0 0 10 10" 
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="Fant"
-                           Grid.Row="0"
-                           Grid.Column="0"
-                           x:Name="imgSmall"/>
-                        <Canvas x:Name ="cnvSmall" 
-                            Background="Transparent"
-                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            VerticalAlignment = "Top" 
-                            HorizontalAlignment="Center"/>
-
-                        <Image VerticalAlignment = "Top" 
-                           Margin = "10 0 0 10" 
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="Fant"
-                           Grid.Row="0"
-                           Grid.Column="1"
-                           x:Name="imgGreen"/>
-                        <Canvas x:Name ="cnvGreen" 
-                            Background="Transparent"
-                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            VerticalAlignment = "Top" 
-                            HorizontalAlignment="Center"/>
-                        
-                        <Image VerticalAlignment = "Top" 
-                           Margin = "0 10 10 0" 
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="Fant"
-                           Grid.Row="1"
-                           Grid.Column="0"
-                           x:Name="imgMask"/>
-                        <Canvas x:Name ="cnvMask" 
-                            Background="Transparent"
-                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            VerticalAlignment = "Top" 
-                            HorizontalAlignment="Center"/>
-                        <Image VerticalAlignment = "Top" 
-                           Margin = "10 10 0 0" 
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="Fant"
-                           Grid.Row="1"
-                           Grid.Column="1"
-                           x:Name="imgMaskAndImage"/>
-                        <Canvas x:Name ="cnvMaskAndImage" 
-                            Background="Transparent"
-                            MouseLeftButtonDown="cnv_MouseLeftButtonDown"
-                            Grid.Row="1"
-                            Grid.Column="1"
                             VerticalAlignment = "Top" 
                             HorizontalAlignment="Center"/>
                     </Grid>
+                    <Grid x:Name="gridFourImage" Visibility="Visible" >
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Canvas x:Name ="cnvSmall" 
+                                Background="Transparent"
+                                MouseLeftButtonDown="cnv_MouseLeftButtonDown"
+                                VerticalAlignment = "Top" 
+                                HorizontalAlignment="Center"
+                                Grid.Row="0"
+                                Grid.Column="0"/>
+                            <Canvas x:Name ="cnvGreen" 
+                                Background="Transparent"
+                                MouseLeftButtonDown="cnv_MouseLeftButtonDown"
+                                VerticalAlignment = "Top" 
+                                HorizontalAlignment="Center"
+                                Grid.Row="0"
+                                Grid.Column="1"/>
+                            <Canvas x:Name ="cnvMask" 
+                                Background="Transparent"
+                                MouseLeftButtonDown="cnv_MouseLeftButtonDown"
+                                VerticalAlignment = "Top" 
+                                HorizontalAlignment="Center"
+                                Grid.Row="1"
+                                Grid.Column="0"/>
+                            <Canvas x:Name ="cnvMaskAndImage" 
+                                Background="Transparent"
+                                MouseLeftButtonDown="cnv_MouseLeftButtonDown"
+                                VerticalAlignment = "Top" 
+                                HorizontalAlignment="Center"
+                                Grid.Row="1"
+                                Grid.Column="1"/>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Grid>
-            <Grid x:Name="selectStudyPanel" Visibility="Collapsed">
+            <Grid x:Name="selectStudyPanel" Visibility="Visible">
                 <Grid Margin="10 0 20 0" Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <ScrollViewer 
-                        VerticalScrollBarVisibility="Auto" 
-                        Grid.Column="0" 
-                        x:Name="svSelectStydyPanel"
-                        PreviewMouseWheel="svSelectStydyPanel_PreviewMouseWheel">
-                        <ListView
-                            ItemsSource="{Binding Study}" x:Name="lvStudy" 
-                            SelectionChanged="lvStudy_SelectionChanged">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn
-                                        DisplayMemberBinding="{Binding Id}"
-                                        Header="Id" />
-                                    <GridViewColumn
-                                        DisplayMemberBinding="{Binding Name}"
-                                        Header="Imię i nazwisko" />
-                                    <GridViewColumn
-                                        DisplayMemberBinding="{Binding Description}"
-                                        Header="Opis" />
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                    </ScrollViewer>
+                    <StackPanel>
+                        <Grid Margin="0 20 0 0">
+                            <Label>Wybierz badanie</Label>
+                            <Button HorizontalAlignment="Right"
+                                Style="{StaticResource MaterialDesignRaisedLightButton}"
+                                Width="50"
+                                Height="25"
+                                materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                                x:Name="btnBack" Click="btnBackToImage_Click"
+                                Visibility="Collapsed">
+                                <materialDesign:PackIcon
+                                Kind="ArrowLeft"
+                                Height="15"
+                                Width="15"  />
+                            </Button>
+                        </Grid>
+                        <ScrollViewer 
+                            VerticalScrollBarVisibility="Auto" 
+                            Grid.Column="0" 
+                            x:Name="svSelectStydyPanel"
+                            PreviewMouseWheel="svSelectStydyPanel_PreviewMouseWheel">
+                            <ListView
+                                ItemsSource="{Binding Study}" x:Name="lvStudy" 
+                                SelectionChanged="lvStudy_SelectionChanged">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn
+                                            DisplayMemberBinding="{Binding Id}"
+                                            Header="Id" />
+                                        <GridViewColumn
+                                            DisplayMemberBinding="{Binding Name}"
+                                            Header="Imię i nazwisko" />
+                                        <GridViewColumn
+                                            DisplayMemberBinding="{Binding Description}"
+                                            Header="Opis" />
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </ScrollViewer>
+                    </StackPanel>
                 </Grid>
             </Grid>
         </Grid>
