@@ -78,7 +78,7 @@ namespace EyeStation.PACSDAO
                 catch { }
 
                 studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, desc, angles, lengths, markers, path));
-                RaportGenerator.RaportGenerator.GenerateRaport(dict, path+".jpg");
+                //RaportGenerator.RaportGenerator.GenerateRaport(dict, path+".jpg");
             }
             return studies;
         }
