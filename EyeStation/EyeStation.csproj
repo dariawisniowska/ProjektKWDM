@@ -113,6 +113,10 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Xceed.Words.NET, Version=1.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Xceed.Words.NET.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -131,6 +135,7 @@
     <Compile Include="PACSDAO\ImageConverter.cs" />
     <Compile Include="PACSDAO\PACS.cs" />
     <Compile Include="PACSDAO\Patient.cs" />
+    <Compile Include="RaportGenerator\RaportGenerator.cs" />
     <Compile Include="Tools\MeasureTool.cs" />
     <Compile Include="VesselSegmentatorFilter\BitmapWriter.cs" />
     <Compile Include="VesselSegmentatorFilter\CanalType.cs" />

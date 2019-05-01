@@ -78,8 +78,24 @@ namespace EyeStation.PACSDAO
                 catch { }
 
                 studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, desc, angles, lengths, markers, path));
+                RaportGenerator.RaportGenerator.GenerateRaport(dict, path+".jpg");
             }
             return studies;
+        }
+
+        public Dictionary<string, string> GetPatientTags(string patientID)
+        {
+            GetData();
+            foreach (Patient p in data)
+            {
+                if (p.patientID == patientID)
+                {
+                    string path = System.IO.Directory.GetCurrentDirectory() + p.name.Remove(0, 1);
+                    string klucz = p.name.Replace("\\", "\\\\");
+                    return p.datas[klucz];                   
+                }
+            }
+            return new Dictionary<string, string>();
         }
 
         public bool Store(string path)
