@@ -24,6 +24,7 @@ using EyeStation.Models;
 using System.IO;
 using VesselSegmentatorFilter;
 using EyeStation.VesselSegmentatorFilter;
+using System.Web.Script.Serialization;
 
 namespace EyeStation
 {
@@ -48,6 +49,7 @@ namespace EyeStation
             items = serwer.GetStudies();
             lvStudy.ItemsSource = items;
 
+            jss = new JavaScriptSerializer();
         }
         void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -59,13 +61,15 @@ namespace EyeStation
         private bool isMeasureTool = false;
         private List<Point> anglePoints;
         private bool isAngleTool = false;
-        private List<Marker> markersPoints;
         private bool isMarkerTool = false;
         private Line line;
         private Line startLine;
         private Canvas actualCanvas;
         private VesselSegmentator vesselSegmentator;
         private BitmapImage imageSource;
+        private StudyDrawing studyDrawing;
+        private Study actualStudy;
+        private JavaScriptSerializer jss;
 
         private void btnFourImage_Click(object sender, RoutedEventArgs e)
         {
@@ -249,29 +253,72 @@ namespace EyeStation
                 InputDialog inputDialog = new InputDialog("Nowy znacznik", "Wprowadź opis dla wskazanego znacznika:", "");
                 if (inputDialog.ShowDialog() == true && inputDialog.Answer != null && inputDialog.Answer != "")
                 {
-                    Ellipse elipse = MeasureTool.createMarker(point);
-                    ToolTip tt = new ToolTip();
-                    tt.Content = wrapText(100, inputDialog.Answer);
-                    elipse.ToolTip = tt;
-                    cnv.Children.Add(elipse);
-                    TextBlock textBlock = MeasureTool.createTextBox(MeasureTool.TextBlockColor.Mint);
-                    textBlock.Text = (this.markersPoints.Count + 1).ToString();
-                    textBlock.FontSize = 11;
+                    //Ellipse elipse = MeasureTool.createMarker(point);
+                    //ToolTip tt = new ToolTip();
+                    //tt.Content = wrapText(100, inputDialog.Answer);
+                    //elipse.ToolTip = tt;
+                    //cnv.Children.Add(elipse);
+                    //TextBlock textBlock = MeasureTool.createTextBox(MeasureTool.TextBlockColor.Mint);
+                    //textBlock.Text = (studyDrawing.MarkerList.Count + 1).ToString();
+                    //textBlock.FontSize = 11;
 
-                    Canvas.SetLeft(textBlock, point.X - 3);
-                    Canvas.SetTop(textBlock, point.Y - 5);
-                    textBlock.ToolTip = tt;
-                    cnv.Children.Add(textBlock);
+                    //Canvas.SetLeft(textBlock, point.X - 3);
+                    //Canvas.SetTop(textBlock, point.Y - 5);
+                    //textBlock.ToolTip = tt;
+                    //cnv.Children.Add(textBlock);
 
                     Marker marker = new Marker();
-                    marker.Id = this.markersPoints.Count + 1;
-                    marker.point = point;
+                    marker.Id = studyDrawing.MarkerList.Count + 1;
+                    marker.Point = point;
                     marker.Description = inputDialog.Answer;
-                    this.markersPoints.Add(marker);
+                    marker.ActualCanvas = cnv.Name;
+                    drawMarker(marker, cnv);
+
+                    Point realPoint = MeasureTool.toRealPoint(point.X, point.Y, imageSource.PixelHeight, cnv.ActualHeight);
+                    marker.Point = realPoint;
+                    studyDrawing.MarkerList.Add(marker);
                 }
             }
         }
 
+        private void drawMarker(Marker marker, Canvas cnv)
+        {
+            if (cnv == null) {
+                cnv = getActualCanvas(marker.ActualCanvas);
+            }
+
+            Ellipse elipse = MeasureTool.createMarker(marker.Point);
+            ToolTip tt = new ToolTip();
+            tt.Content = wrapText(100, marker.Description);
+            elipse.ToolTip = tt;
+            cnv.Children.Add(elipse);
+            TextBlock textBlock = MeasureTool.createTextBox(MeasureTool.TextBlockColor.Mint);
+            textBlock.Text = (marker.Id).ToString();
+            textBlock.FontSize = 11;
+
+            Canvas.SetLeft(textBlock, marker.Point.X - 3);
+            Canvas.SetTop(textBlock, marker.Point.Y - 5);
+            textBlock.ToolTip = tt;
+            cnv.Children.Add(textBlock);
+        }
+
+        private Canvas getActualCanvas(String actualCanvas)
+        {
+            Canvas cnv = null;
+            switch (actualCanvas)
+            {
+                case "cnvSmall":
+                    return cnv = cnvSmall;
+                case "cnvGreen":
+                    return cnv = cnvGreen;
+                case "cnvMask":
+                    return cnv = cnvMask;
+                case "cnvMaskAndImage":
+                    return cnv = cnvMaskAndImage;
+                default:
+                    return cnv = cnvSmall;
+            }
+        }
         private void btnSelect_Checked(object sender, RoutedEventArgs e)
         {
             //TO DO:
@@ -342,6 +389,8 @@ namespace EyeStation
 
                 try
                 {
+                    saveAllStudyDrawing();
+
                     displayImage(new BitmapImage(study.ImageSource.UriSource));
 
                     btnBack.Visibility = Visibility.Visible;
@@ -351,8 +400,36 @@ namespace EyeStation
                     setSizeOfCanvas();
                     clearAllCanvas();
                     uncheckedAll();
+
+                    studyDrawing = new StudyDrawing();
+                    studyDrawing.MarkerList = new List<Marker>();
+                    this.actualStudy = (Study)lvStudy.SelectedItems[0];
+
+                    if (study.Markers != null && study.Markers != "[]" && study.Markers != "- ")
+                    {
+                        //draw markers;
+                        //"[{Id:1,Point:{X:420.3257142857143,Y:290.4},Description:opis1,ActualCanvas:cnvSmall},{Id:2,Point:{X:226.72571428571436,Y:374.75428571428569},Description:opis2,ActualCanvas:cnvGreen}] "
+
+                        string markers = study.Markers;
+
+                        //string[] markers1 = markers.Split('{');
+                        //foreach(string mark in markers1){
+                        //    if()
+                        //}
+                        //markers.Replace("{","{\"");
+                        //markers.Replace(":", "\":\"");
+                        //markers.Replace(",", ",\"");
+                        //markers.Replace("}", "\"}");
+                        markers = "[{\"Id\":1,\"Point\":{\"X\":420.3257142857143,\"Y\":290.4},\"Description\":\"opis1\",\"ActualCanvas\":\"cnvSmall\"},{\"Id\":2,\"Point\":{\"X\":226.72571428571436,\"Y\":374.75428571428569},\"Description\":\"opis2\",\"ActualCanvas\":\"cnvGreen\"}] ";
+                        studyDrawing.MarkerList = jss.Deserialize<List<Marker>>(markers);
+
+                        foreach (Marker marker in studyDrawing.MarkerList)
+                        {
+                            drawMarker(marker, null);
+                        }
+                    }
                 }
-                catch(NullReferenceException ex)
+                catch (NullReferenceException ex)
                 {
                     SimpleDialog simpleDialog = new SimpleDialog("Brak obrazu", "Plik DICOM nie posiada danych obrazowych. Wybierz inne badanie.");
                     simpleDialog.ShowDialog();
@@ -409,10 +486,10 @@ namespace EyeStation
 
                 saveImagesToPng(path);
 
-                if (this.markersPoints.Count > 0)
+                if (studyDrawing.MarkerList.Count > 0)
                 {
                     StreamWriter file = new StreamWriter(path.Replace(".png", ".txt"));
-                    foreach (Marker marker in markersPoints)
+                    foreach (Marker marker in studyDrawing.MarkerList)
                     {
                         string line = marker.Id + ". " + marker.Description;
                         file.WriteLine(line);
@@ -488,7 +565,6 @@ namespace EyeStation
             btnAnalysis.IsEnabled = true;
             btnDesription.IsEnabled = true;
             btnReport.IsEnabled = true;
-            this.markersPoints = new List<Marker>();
         }
 
         private void setSizeOfCanvas()
@@ -624,6 +700,30 @@ namespace EyeStation
             cnvMask.Background = ibMask;
 
             //END TEMPORARTY
+        }
+
+        private void saveAllStudyDrawing()
+        {
+            if (studyDrawing != null)
+            {
+                int index = lvStudy.SelectedIndex;
+                string markerJson = jss.Serialize(studyDrawing.MarkerList);
+                if (markerJson != "[]" && markerJson != null && markerJson != "- " && markerJson != this.actualStudy.Markers)
+                {
+                    SimpleDialog simpleDialog = new SimpleDialog("", "");
+                    if (Study.EditMarkers(serwer, this.actualStudy, markerJson))
+                    {
+                        simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie znaczników zakończone powodzeniem.");
+                    }
+                    else
+                        simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie znaczników nie powiodło się.");
+
+                    simpleDialog.ShowDialog();
+                    lvStudy.ItemsSource = serwer.GetStudies();
+                    lvStudy.SelectedIndex = index;
+                }
+
+            }
         }
     }
 }

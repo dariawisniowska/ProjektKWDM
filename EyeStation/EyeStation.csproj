@@ -101,6 +101,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -129,8 +130,10 @@
     <Compile Include="CustomDialogs\SimpleDialog.xaml.cs">
       <DependentUpon>SimpleDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\CanvasType.cs" />
     <Compile Include="Models\Marker.cs" />
     <Compile Include="Models\Study.cs" />
+    <Compile Include="Models\StudyDrawing.cs" />
     <Compile Include="PACSDAO\DCMTK.cs" />
     <Compile Include="PACSDAO\ImageConverter.cs" />
     <Compile Include="PACSDAO\PACS.cs" />

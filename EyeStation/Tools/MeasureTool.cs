@@ -79,5 +79,31 @@ namespace EyeStation.Tools
             var brush = new SolidColorBrush(Color.FromRgb(5, 252, 229));
             return new Ellipse() { Margin = new Thickness(point.X - 13, point.Y - 13, 0,0), Height=26, Width=26, Stroke = brush, StrokeThickness = 3 , Fill = brush};
         }
+
+        public static double toRealValue(double actualX, int realHeight, double actualHeight) {
+            return actualX * realHeight / actualHeight;
+        }
+
+        public static double toActualValue(double realX, int realHeight, double actualHeight)
+        {
+            return realX * actualHeight / realHeight;
+        }
+
+        public static Point toRealPoint(double actualX, double actualY, int realHeight, double actualHeight) {
+            Point p = new Point();
+            p.X = toRealValue(actualX, realHeight, actualHeight);
+            p.Y = toRealValue(actualY, realHeight, actualHeight);
+            return p;
+        }
+
+        public static Point toActualPoint(double realX, double realY, int realHeight, double actualHeight)
+        {
+            Point p = new Point();
+            p.X = toActualValue(realX, realHeight, actualHeight);
+            p.Y = toActualValue(realY, realHeight, actualHeight);
+            return p;
+        }
+
+
     }
 }
