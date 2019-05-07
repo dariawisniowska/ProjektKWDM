@@ -307,7 +307,8 @@
                             MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="0"
                             VerticalAlignment = "Top" 
-                            HorizontalAlignment="Center"/>
+                            HorizontalAlignment="Center"
+							Cursor="Cross"/>
                     </Grid>
                     <Grid x:Name="gridFourImage" Visibility="Visible" >
                         <Grid>
@@ -325,28 +326,32 @@
                                 VerticalAlignment = "Top" 
                                 HorizontalAlignment="Center"
                                 Grid.Row="0"
-                                Grid.Column="0"/>
+                                Grid.Column="0"
+								Cursor="Cross"/>
                             <Canvas x:Name ="cnvGreen" 
                                 Background="Transparent"
                                 MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                                 VerticalAlignment = "Top" 
                                 HorizontalAlignment="Center"
                                 Grid.Row="0"
-                                Grid.Column="1"/>
+                                Grid.Column="1"
+								Cursor="Cross"/>
                             <Canvas x:Name ="cnvMask" 
                                 Background="Transparent"
                                 MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                                 VerticalAlignment = "Top" 
                                 HorizontalAlignment="Center"
                                 Grid.Row="1"
-                                Grid.Column="0"/>
+                                Grid.Column="0"
+								Cursor="Cross"/>
                             <Canvas x:Name ="cnvMaskAndImage" 
                                 Background="Transparent"
                                 MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                                 VerticalAlignment = "Top" 
                                 HorizontalAlignment="Center"
                                 Grid.Row="1"
-                                Grid.Column="1"/>
+                                Grid.Column="1"
+								Cursor="Cross"/>
                         </Grid>
                     </Grid>
                 </Grid>

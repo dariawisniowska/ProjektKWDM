@@ -9,5 +9,7 @@ namespace EyeStation.Models
     public class StudyDrawing
     {
         public List<Marker> MarkerList { get; set; }
+
+		public bool Modyfied { get; set; }
     }
 }
