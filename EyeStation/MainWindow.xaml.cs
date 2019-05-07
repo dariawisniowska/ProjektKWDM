@@ -253,20 +253,6 @@ namespace EyeStation
 				InputDialog inputDialog = new InputDialog("Nowy znacznik", "Wprowadź opis dla wskazanego znacznika:", "");
 				if (inputDialog.ShowDialog() == true && inputDialog.Answer != null && inputDialog.Answer != "")
 				{
-					//Ellipse elipse = MeasureTool.createMarker(point);
-					//ToolTip tt = new ToolTip();
-					//tt.Content = wrapText(100, inputDialog.Answer);
-					//elipse.ToolTip = tt;
-					//cnv.Children.Add(elipse);
-					//TextBlock textBlock = MeasureTool.createTextBox(MeasureTool.TextBlockColor.Mint);
-					//textBlock.Text = (studyDrawing.MarkerList.Count + 1).ToString();
-					//textBlock.FontSize = 11;
-
-					//Canvas.SetLeft(textBlock, point.X - 3);
-					//Canvas.SetTop(textBlock, point.Y - 5);
-					//textBlock.ToolTip = tt;
-					//cnv.Children.Add(textBlock);
-
 					Marker marker = new Marker();
 					marker.Id = studyDrawing.MarkerList.Count + 1;
 					marker.Point = point;
