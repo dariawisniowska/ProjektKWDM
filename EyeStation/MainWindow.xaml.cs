@@ -51,7 +51,8 @@ namespace EyeStation
 
 			jss = new JavaScriptSerializer();
 		}
-		void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+   
+        void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
 		{
 			if (e.Key == System.Windows.Input.Key.Escape)
 				this.Close();

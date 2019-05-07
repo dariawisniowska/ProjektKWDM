@@ -72,11 +72,16 @@ namespace EyeStation.Model
         private static bool EditStudy(PACSObj serwer, EyeStation.Model.Study studyToEdit, string tag, string value)
         {
             //Zmiana DICOMA
-            DCMTK.GDCMANON(studyToEdit.FilePath, tag, value);
+            DCMTK.GDCMANON(studyToEdit.FilePath, tag, replacePolishSymbols(value));
             //Zapis do PACS
             bool result = serwer.Store(studyToEdit.FilePath+".dcm");
 
             return result;
+        }
+
+        private static string replacePolishSymbols(string s)
+        {
+            return s.Replace('ą', 'a').Replace('ę', 'e').Replace('ż', 'z').Replace('ź', 'z').Replace('ń', 'n').Replace('ł', 'l').Replace('ó', 'o').Replace('ć', 'c').Replace('ś', 's').Replace('Ą', 'A').Replace('Ę', 'E').Replace('Ż', 'Z').Replace('Ź', 'Z').Replace('Ń', 'N').Replace('Ł', 'L').Replace('Ó', 'O').Replace('Ć', 'C').Replace('Ś', 'S');
         }
 
     }
