@@ -130,6 +130,7 @@
     <Compile Include="CustomDialogs\SimpleDialog.xaml.cs">
       <DependentUpon>SimpleDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\Angle.cs" />
     <Compile Include="Models\CanvasType.cs" />
     <Compile Include="Models\Marker.cs" />
     <Compile Include="Models\Study.cs" />

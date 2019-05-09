@@ -57,15 +57,18 @@ namespace EyeStation.Tools
             return textBlock;
         }
 
-        public static TextBlock getAngleOfActiveLine(List<Point> anglePoints)
-        {
+        public static double getAngleValue(List<Point> anglePoints) {
             int pointCount = anglePoints.Count;
             double x1 = anglePoints[pointCount - 3].X - anglePoints[pointCount - 2].X;
             double y1 = anglePoints[pointCount - 2].Y - anglePoints[pointCount - 3].Y;
             double x2 = anglePoints[pointCount - 1].X - anglePoints[pointCount - 2].X;
             double y2 = anglePoints[pointCount - 2].Y - anglePoints[pointCount - 1].Y;
-            double angle = Math.Acos((x1 * x2 + y1 * y2) / (Math.Sqrt(x1 * x1 + y1 * y1) * Math.Sqrt(x2 * x2 + y2 * y2))) * 180 / Math.PI;
+            return Math.Acos((x1 * x2 + y1 * y2) / (Math.Sqrt(x1 * x1 + y1 * y1) * Math.Sqrt(x2 * x2 + y2 * y2))) * 180 / Math.PI;
+        }
 
+        public static TextBlock getAngleOfActiveLine(List<Point> anglePoints, double angle)
+        {
+            int pointCount = anglePoints.Count;
             TextBlock textBlock = MeasureTool.createTextBox(TextBlockColor.Blue);
             textBlock.Text = " " + Math.Round(angle) + "° ";
             Canvas.SetLeft(textBlock, anglePoints[pointCount - 2].X);

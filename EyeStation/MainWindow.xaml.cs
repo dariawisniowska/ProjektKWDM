@@ -224,11 +224,21 @@ namespace EyeStation
 				{
 					this.line = MeasureTool.createLine(anglePoints[pointCount - 2], anglePoints[pointCount - 1]);
 					cnv.Children.Add(line);
-					TextBlock textBlock = MeasureTool.getAngleOfActiveLine(this.anglePoints);
+                    double angleValue = MeasureTool.getAngleValue(this.anglePoints);
+                    TextBlock textBlock = MeasureTool.getAngleOfActiveLine(this.anglePoints, angleValue);
 					cnv.Children.Add(textBlock);
-					this.anglePoints = new List<Point>();
-				}
-				else
+					
+                    Angle angle = new Angle();
+                    angle.Id = studyDrawing.AngleList.Count + 1;
+                    angle.Points = anglePoints;
+                    angle.Value = angleValue;
+                    angle.ActualCanvas = cnv.Name;
+                    studyDrawing.AngleList.Add(angle);
+                    studyDrawing.Modyfied = true;
+
+                    this.anglePoints = new List<Point>();
+                }
+                else
 				{
 					if (pointCount == 2)
 					{
@@ -238,7 +248,8 @@ namespace EyeStation
 					{
 						this.actualCanvas.Children.Remove(this.line);
 						this.actualCanvas.Children.Remove(this.startLine);
-					}
+
+                    }
 					this.actualCanvas = cnv;
 					this.anglePoints = new List<Point>();
 					this.anglePoints.Add(e.GetPosition(cnv));
@@ -289,6 +300,20 @@ namespace EyeStation
 			textBlock.ToolTip = tt;
 			cnv.Children.Add(textBlock);
 		}
+
+        private void drawAngles(Angle angle)
+        {
+            List<Point> points = angle.Points;
+            int pointCount = points.Count;
+            Line firstLine = MeasureTool.createLine(points[pointCount - 3], points[pointCount - 2]);
+            Canvas cnv = getActualCanvas(angle.ActualCanvas);
+            cnv.Children.Add(firstLine);
+      
+			Line secondLine = MeasureTool.createLine(points[pointCount - 2], points[pointCount - 1]);
+			cnv.Children.Add(secondLine);
+            TextBlock textBlock = MeasureTool.getAngleOfActiveLine(points, angle.Value);
+            cnv.Children.Add(textBlock);
+        }
 
 		private Canvas getActualCanvas(String actualCanvas)
 		{
@@ -391,7 +416,8 @@ namespace EyeStation
 
 					studyDrawing = new StudyDrawing();
 					studyDrawing.MarkerList = new List<Marker>();
-					this.actualStudy = (Study)lvStudy.SelectedItems[0];
+                    studyDrawing.AngleList = new List<Angle>();
+                    this.actualStudy = (Study)lvStudy.SelectedItems[0];
 
 					if (study.Markers != null && study.Markers != "[]" && study.Markers != "- ")
 					{
@@ -405,7 +431,23 @@ namespace EyeStation
 							drawMarker(marker, null);
 						}
 					}
-				}
+                    if (study.Angles != null && study.Angles != "[]" && study.Angles != "- ")
+                    {
+                        string angles = study.Angles;
+                        angles = angles.Replace('*', '"');
+                        studyDrawing.AngleList = jss.Deserialize<List<Angle>>(angles);
+
+                        foreach (Angle angle in studyDrawing.AngleList)
+                        {
+                            for (int i = 0; i < angle.Points.Count; i++)
+                            {
+                                Point actualPoint = MeasureTool.toActualPoint(angle.Points[i].X, angle.Points[i].Y, imageSource.PixelHeight, cnvSmall.Height);
+                                angle.Points[i] = actualPoint;
+                            }
+                            drawAngles(angle);
+                        }
+                    }
+                }
 				catch (NullReferenceException ex)
 				{
 					SimpleDialog simpleDialog = new SimpleDialog("Brak obrazu", "Plik DICOM nie posiada danych obrazowych. Wybierz inne badanie.");
@@ -685,8 +727,10 @@ namespace EyeStation
 			{
 				studyDrawing.Modyfied = false;
 				int index = lvStudy.SelectedIndex;
+                bool refreshStudy = false;
+                bool showError = false;
 
-				foreach(Marker marker in studyDrawing.MarkerList)
+                foreach (Marker marker in studyDrawing.MarkerList)
 				{
 					Point realPoint = MeasureTool.toRealPoint(marker.Point.X, marker.Point.Y, imageSource.PixelHeight, cnvSmall.ActualHeight);
 					marker.Point = realPoint;
@@ -695,20 +739,46 @@ namespace EyeStation
 				markerJson = markerJson.Replace('"', '*');
 				if (markerJson != "[]" && markerJson != null && markerJson != "- " && markerJson != this.actualStudy.Markers)
 				{
-					SimpleDialog simpleDialog = new SimpleDialog("", "");
-					if (Study.EditMarkers(serwer, this.actualStudy, markerJson))
-					{
-						simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie znaczników zakończone powodzeniem.");
-					}
-					else
-						simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie znaczników nie powiodło się.");
-
-					simpleDialog.ShowDialog();
-					lvStudy.ItemsSource = serwer.GetStudies();
-					lvStudy.SelectedIndex = index;
+                    if (Study.EditMarkers(serwer, this.actualStudy, markerJson))
+                        refreshStudy = true;
+                    else
+                        showError = true;
 				}
+                foreach (Angle angle in studyDrawing.AngleList)
+                {
+                    for(int i=0; i<angle.Points.Count; i++)
+                    {
+                        Point realPoint = MeasureTool.toRealPoint(angle.Points[i].X, angle.Points[i].Y, imageSource.PixelHeight, cnvSmall.ActualHeight);
+                        angle.Points[i] = realPoint;
+                    }
+                }
+                string angleJson = jss.Serialize(studyDrawing.AngleList);
+                angleJson = angleJson.Replace('"', '*');
+                if (angleJson != "[]" && angleJson != null && angleJson != "- " && angleJson != this.actualStudy.Angles)
+                {
+                    if (Study.EditAngles(serwer, this.actualStudy, angleJson))
+                        refreshStudy = true;
+                    else
+                        showError = true;
+                }
+                //tu linie 
+                if (refreshStudy)
+                {
+                    SimpleDialog simpleDialog = new SimpleDialog("", "");
+                    if (!showError)
+                    {
+                        simpleDialog = new SimpleDialog("Sukces", "Wprowadzone zmiany zostały zapisane prawidłowo.");
+                    }
+                    else
+                    {
+                        simpleDialog = new SimpleDialog("Bład", "Zapis nie powiodł się.");
+                    }
+                    simpleDialog.ShowDialog();
+                    lvStudy.ItemsSource = serwer.GetStudies();
+                    lvStudy.SelectedIndex = index;
+                }
 
-			}
+            }
 		}
 	}
 }

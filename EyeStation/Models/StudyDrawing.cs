@@ -10,6 +10,8 @@ namespace EyeStation.Models
     {
         public List<Marker> MarkerList { get; set; }
 
-		public bool Modyfied { get; set; }
+        public List<Angle> AngleList { get; set; }
+
+        public bool Modyfied { get; set; }
     }
 }
