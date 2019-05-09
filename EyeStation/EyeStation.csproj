@@ -132,6 +132,7 @@
     </Compile>
     <Compile Include="Models\Angle.cs" />
     <Compile Include="Models\CanvasType.cs" />
+    <Compile Include="Models\MeasureLine.cs" />
     <Compile Include="Models\Marker.cs" />
     <Compile Include="Models\Study.cs" />
     <Compile Include="Models\StudyDrawing.cs" />

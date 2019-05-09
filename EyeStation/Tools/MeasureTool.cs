@@ -37,18 +37,20 @@ namespace EyeStation.Tools
             return textBlock;
         }
 
-        public static TextBlock getLengthOfActiveLine(List<Point> measurePoints, int srcHeight, double actualHeight, double pixelSize)
+        public static double getLengthValue(List<Point> measurePoints, int srcHeight, double actualHeight, double pixelSize)
         {
             double length = 0;
-            int pointCount = measurePoints.Count;
             for (int i = 1; i < measurePoints.Count; i++)
             {
                 length += Math.Sqrt((measurePoints[i - 1].X - measurePoints[i].X) * (measurePoints[i - 1].X - measurePoints[i].X)
                             + (measurePoints[i - 1].Y - measurePoints[i].Y) * (measurePoints[i - 1].Y - measurePoints[i].Y));
             }
+            return length = pixelSize * length * srcHeight / actualHeight;
+        }
 
-            length = pixelSize * length * srcHeight / actualHeight;
-
+        public static TextBlock createTextBlockForLine(List<Point> measurePoints, double length)
+        {
+            int pointCount = measurePoints.Count;
             TextBlock textBlock = MeasureTool.createTextBox(TextBlockColor.Blue);
             textBlock.Text = " " + Math.Round(length) + "px ";
             Canvas.SetLeft(textBlock, measurePoints[pointCount - 1].X);
@@ -66,7 +68,7 @@ namespace EyeStation.Tools
             return Math.Acos((x1 * x2 + y1 * y2) / (Math.Sqrt(x1 * x1 + y1 * y1) * Math.Sqrt(x2 * x2 + y2 * y2))) * 180 / Math.PI;
         }
 
-        public static TextBlock getAngleOfActiveLine(List<Point> anglePoints, double angle)
+        public static TextBlock createTextBlockForAngle(List<Point> anglePoints, double angle)
         {
             int pointCount = anglePoints.Count;
             TextBlock textBlock = MeasureTool.createTextBox(TextBlockColor.Blue);

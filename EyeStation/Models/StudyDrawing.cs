@@ -12,6 +12,8 @@ namespace EyeStation.Models
 
         public List<Angle> AngleList { get; set; }
 
+        public List<MeasureLine> LineList { get; set; }
+
         public bool Modyfied { get; set; }
     }
 }
