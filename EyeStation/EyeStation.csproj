@@ -124,6 +124,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CustomDialogs\CorrectSegmentationDialog.xaml.cs">
+      <DependentUpon>CorrectSegmentationDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CustomDialogs\InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
     </Compile>
@@ -149,6 +152,10 @@
     <Compile Include="VesselSegmentatorFilter\VesselSegmentatioMethod.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentator.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentatorConstructorHelper.cs" />
+    <Page Include="CustomDialogs\CorrectSegmentationDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CustomDialogs\InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

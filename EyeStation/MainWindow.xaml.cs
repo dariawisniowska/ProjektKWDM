@@ -68,9 +68,11 @@ namespace EyeStation
         private Canvas actualCanvas;
         private VesselSegmentator vesselSegmentator;
         private BitmapImage imageSource;
+        private BitmapImage maskImage;
         private StudyDrawing studyDrawing;
         private Study actualStudy;
         private JavaScriptSerializer jss;
+        private byte[][] maskInBytes;
 
         private void btnFourImage_Click(object sender, RoutedEventArgs e)
         {
@@ -93,8 +95,6 @@ namespace EyeStation
         private void btnMeasure_Checked(object sender, RoutedEventArgs e)
         {
             btnAngle.IsChecked = false;
-            btnSelect.IsChecked = false;
-            btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
 
             this.isMeasureTool = true;
@@ -124,8 +124,6 @@ namespace EyeStation
         private void btnAngle_Checked(object sender, RoutedEventArgs e)
         {
             btnMeasure.IsChecked = false;
-            btnSelect.IsChecked = false;
-            btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
 
             this.isAngleTool = true;
@@ -360,54 +358,11 @@ namespace EyeStation
                     return cnv = cnvSmall;
             }
         }
-        private void btnSelect_Checked(object sender, RoutedEventArgs e)
-        {
-            //TO DO:
-            /* 
-             * Manualna segmentacja na obrazie (na którym? mamy tylko maskę)
-             */
-
-            btnMeasure.IsChecked = false;
-            btnAngle.IsChecked = false;
-            btnUnSelect.IsChecked = false;
-            btnAddMarker.IsChecked = false;
-        }
-        private void btnSelect_Unchecked(object sender, RoutedEventArgs e)
-        {
-            //TO DO:
-            /* 
-             * Wyłączenie opcji
-             */
-        }
-
-        private void btnUnSelect_Checked(object sender, RoutedEventArgs e)
-        {
-            //TO DO:
-            /* 
-             * Manualna poprawa segmentacji na obrazie - usuwanie zaznaczenia (na wysegmentowanym)
-             */
-
-            btnMeasure.IsChecked = false;
-            btnAngle.IsChecked = false;
-            btnSelect.IsChecked = false;
-            btnAddMarker.IsChecked = false;
-        }
-
-        private void btnUnSelect_Unchecked(object sender, RoutedEventArgs e)
-        {
-            //TO DO:
-            /* 
-             * Wyłączenie opcji
-             */
-        }
 
         private void btnAddMarker_Checked(object sender, RoutedEventArgs e)
         {
             btnMeasure.IsChecked = false;
             btnAngle.IsChecked = false;
-            btnSelect.IsChecked = false;
-            btnUnSelect.IsChecked = false;
-
             this.isMarkerTool = true;
         }
 
@@ -566,6 +521,22 @@ namespace EyeStation
             }
         }
 
+        private void btnSegmentationImage_Click(object sender, RoutedEventArgs e)
+        {
+            uncheckedAll();
+            CorrectSegmentationDialog csd = new CorrectSegmentationDialog(this.imageSource, this.maskImage, this.maskInBytes);
+            if (csd.ShowDialog() == true)
+            {
+                if (csd.IsNewMask && csd.NewMask != null)
+                {
+                    this.maskImage = BitmapWriter.Bitmap2BitmapImage(csd.NewMask);
+                    ImageBrush ibMask = new ImageBrush();
+                    ibMask.ImageSource = this.maskImage;
+                    cnvMask.Background = ibMask;
+                }
+            }
+        }
+
         private void btnAnalysis_Click(object sender, RoutedEventArgs e)
         {
             //TO DO:
@@ -622,13 +593,12 @@ namespace EyeStation
         {
             btnMeasure.IsEnabled = true;
             btnAngle.IsEnabled = true;
-            btnSelect.IsEnabled = true;
-            btnUnSelect.IsEnabled = true;
             btnAddMarker.IsEnabled = true;
             btnSaveImage.IsEnabled = true;
             btnAnalysis.IsEnabled = true;
             btnDesription.IsEnabled = true;
             btnReport.IsEnabled = true;
+            btnSegmentation.IsEnabled = true;
         }
 
         private void setSizeOfCanvas()
@@ -652,8 +622,6 @@ namespace EyeStation
         {
             btnMeasure.IsChecked = false;
             btnAngle.IsChecked = false;
-            btnSelect.IsChecked = false;
-            btnUnSelect.IsChecked = false;
             btnAddMarker.IsChecked = false;
         }
 
@@ -755,9 +723,11 @@ namespace EyeStation
             //TEMPORARY
             vesselSegmentator.SetInput(BitmapWriter.BitmapImage2Bitmap(image));
             vesselSegmentator.Calculate();
-            var result = BitmapWriter.GetBitmap(vesselSegmentator.Result);
+            this.maskInBytes = vesselSegmentator.Result;
+            var result = BitmapWriter.GetBitmap(maskInBytes);
             ImageBrush ibMask = new ImageBrush();
-            ibMask.ImageSource = BitmapWriter.Bitmap2BitmapImage(result);
+            this.maskImage = BitmapWriter.Bitmap2BitmapImage(result);
+            ibMask.ImageSource = this.maskImage;
             cnvMask.Background = ibMask;
 
             //END TEMPORARTY
