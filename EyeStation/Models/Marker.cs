@@ -17,5 +17,14 @@ namespace EyeStation.Models
         public string Description { get; set; }
 
         public string ActualCanvas { get; set; }
+
+        public Marker() { }
+
+        public Marker(Marker marker) {
+            this.Id = marker.Id;
+            this.Point = marker.Point;
+            this.Description = marker.Description;
+            this.ActualCanvas = marker.ActualCanvas;
+        }
     }
 }

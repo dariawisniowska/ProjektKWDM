@@ -17,5 +17,15 @@ namespace EyeStation.Models
         public double Value { get; set; }
 
         public string ActualCanvas { get; set; }
+
+        public Angle() { }
+
+        public Angle(Angle angle)
+        {
+            this.Id = angle.Id;
+            this.Points = angle.Points;
+            this.Value = angle.Value;
+            this.ActualCanvas = angle.ActualCanvas;
+        }
     }
 }

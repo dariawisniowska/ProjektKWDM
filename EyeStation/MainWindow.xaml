@@ -282,7 +282,7 @@
                     </Slider>
                 </Grid>
                 <Grid Grid.Row="1" x:Name="gridCanvas" Margin = "20 0 30 30">
-                    <Grid x:Name="gridOneImage" Visibility="Collapsed">
+                    <Grid x:Name="gridOneImage" Visibility="Hidden">
                         <Canvas x:Name ="cnvBig" 
                             MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="0"

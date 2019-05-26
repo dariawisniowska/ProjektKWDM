@@ -223,7 +223,36 @@ namespace EyeStation
                     angle.Points = anglePoints;
                     angle.Value = angleValue;
                     angle.ActualCanvas = cnv.Name;
-                    studyDrawing.AngleList.Add(angle);
+
+                    if (cnv.Name == "cnvBig")
+                    {
+                        Angle smallAngle = new Angle(angle);
+                        List<Point> newPoints = new List<Point>();
+                        foreach (Point point in angle.Points) {
+                            newPoints.Add(bigToSmallPoint(point));
+                        }
+                        smallAngle.Points = newPoints;
+                        smallAngle.ActualCanvas = "cnvSmall";
+                        drawAngles(smallAngle);
+                        studyDrawing.AngleList.Add(smallAngle);
+                    }
+                    else if (cnv.Name == "cnvSmall")
+                    {
+                        Angle bigAngle = new Angle(angle);
+                        List<Point> newPoints = new List<Point>();
+                        foreach (Point point in angle.Points)
+                        {
+                            newPoints.Add(smallToBigPoint(point));
+                        }
+                        bigAngle.Points = newPoints;
+                        bigAngle.ActualCanvas = "cnvBig";
+                        drawAngles(bigAngle);
+                        studyDrawing.AngleList.Add(angle);
+                    }
+                    else
+                    {
+                        studyDrawing.AngleList.Add(angle);
+                    }
                     studyDrawing.Modyfied = true;
 
                     this.anglePoints = new List<Point>();
@@ -260,9 +289,39 @@ namespace EyeStation
                     marker.Description = inputDialog.Answer;
                     marker.ActualCanvas = cnv.Name;
                     drawMarker(marker, cnv);
-                    studyDrawing.MarkerList.Add(marker);
+                    if (cnv.Name == "cnvBig")
+                    {
+                        Marker smallMarker = new Marker(marker);
+                        smallMarker.Point = bigToSmallPoint(marker.Point);
+                        smallMarker.ActualCanvas = "cnvSmall";
+                        drawMarker(smallMarker, cnvSmall);
+                        studyDrawing.MarkerList.Add(smallMarker);
+                    }
+                    else if (cnv.Name == "cnvSmall")
+                    {
+                        Marker bigMarker = new Marker(marker);
+                        bigMarker.Point = smallToBigPoint(marker.Point);
+                        bigMarker.ActualCanvas = "cnvBig";
+                        drawMarker(bigMarker, cnvBig);
+                        studyDrawing.MarkerList.Add(marker);
+                    }
+                    else
+                    {
+                        studyDrawing.MarkerList.Add(marker);
+                    }
                 }
             }
+        }
+
+        private Point smallToBigPoint(Point point)
+        {
+            Point realPoint = MeasureTool.toRealPoint(point.X, point.Y, imageSource.PixelHeight, cnvSmall.Height);
+            return MeasureTool.toActualPoint(realPoint.X, realPoint.Y, imageSource.PixelHeight, cnvBig.Height);
+        }
+
+        private Point bigToSmallPoint(Point point) {
+            Point realPoint = MeasureTool.toRealPoint(point.X, point.Y, imageSource.PixelHeight, cnvBig.Height);
+            return MeasureTool.toActualPoint(realPoint.X, realPoint.Y, imageSource.PixelHeight, cnvSmall.Height);
         }
 
         private void drawMarker(Marker marker, Canvas cnv)
@@ -320,7 +379,37 @@ namespace EyeStation
             mLine.Points = measurePoints;
             mLine.Value = lineLength;
             mLine.ActualCanvas = cnv.Name;
-            studyDrawing.LineList.Add(mLine);
+
+            if (cnv.Name == "cnvBig")
+            {
+                MeasureLine smallLine = new MeasureLine(mLine);
+                List<Point> newPoints = new List<Point>();
+                foreach (Point point in mLine.Points)
+                {
+                    newPoints.Add(bigToSmallPoint(point));
+                }
+                smallLine.Points = newPoints;
+                smallLine.ActualCanvas = "cnvSmall";
+                drawLine(smallLine);
+                studyDrawing.LineList.Add(smallLine);
+            }
+            else if (cnv.Name == "cnvSmall")
+            {
+                MeasureLine bigLine = new MeasureLine(mLine);
+                List<Point> newPoints = new List<Point>();
+                foreach (Point point in mLine.Points)
+                {
+                    newPoints.Add(smallToBigPoint(point));
+                }
+                bigLine.Points = newPoints;
+                bigLine.ActualCanvas = "cnvBig";
+                drawLine(bigLine);
+                studyDrawing.LineList.Add(mLine);
+            }
+            else
+            {
+                studyDrawing.LineList.Add(mLine);
+            }
             studyDrawing.Modyfied = true;
         }
 
@@ -354,6 +443,8 @@ namespace EyeStation
                     return cnv = cnvMask;
                 case "cnvMaskAndImage":
                     return cnv = cnvMaskAndImage;
+                case "cnvBig":
+                    return cnv = cnvBig;
                 default:
                     return cnv = cnvSmall;
             }
@@ -413,6 +504,13 @@ namespace EyeStation
                         {
                             marker.Point = MeasureTool.toActualPoint(marker.Point.X, marker.Point.Y, imageSource.PixelHeight, cnvSmall.Height);
                             drawMarker(marker, null);
+                            if (marker.ActualCanvas == "cnvSmall")
+                            {
+                                Marker bigMarker = new Marker(marker);
+                                bigMarker.Point = smallToBigPoint(marker.Point);
+                                bigMarker.ActualCanvas = "cnvBig";
+                                drawMarker(bigMarker, null);
+                            }
                         }
                     }
                     if (study.Angles != null && study.Angles != "[]" && study.Angles != "- ")
@@ -429,6 +527,18 @@ namespace EyeStation
                                 angle.Points[i] = actualPoint;
                             }
                             drawAngles(angle);
+                            if (angle.ActualCanvas == "cnvSmall")
+                            {
+                                List<Point> newPoints = new List<Point>();
+                                foreach (Point point in angle.Points)
+                                {
+                                    newPoints.Add(smallToBigPoint(point));
+                                }
+                                Angle bigAngle = new Angle(angle);
+                                bigAngle.Points = newPoints;
+                                bigAngle.ActualCanvas = "cnvBig";
+                                drawAngles(bigAngle);
+                            }
                         }
                     }
                     if (study.Lengths != null && study.Lengths != "[]" && study.Lengths != "- ")
@@ -445,6 +555,18 @@ namespace EyeStation
                                 line.Points[i] = actualPoint;
                             }
                             drawLine(line);
+                            if (line.ActualCanvas == "cnvSmall")
+                            {
+                                List<Point> newPoints = new List<Point>();
+                                foreach (Point point in line.Points)
+                                {
+                                    newPoints.Add(smallToBigPoint(point));
+                                }
+                                MeasureLine bigLine = new MeasureLine(line);
+                                bigLine.Points = newPoints;
+                                bigLine.ActualCanvas = "cnvBig";
+                                drawLine(bigLine);
+                            }
                         }
                     }
                 }
