@@ -25,6 +25,8 @@ using System.IO;
 using VesselSegmentatorFilter;
 using EyeStation.VesselSegmentatorFilter;
 using System.Web.Script.Serialization;
+using EyeStation.VesselsLengthFilter;
+using System.Drawing.Imaging;
 
 namespace EyeStation
 {
@@ -45,6 +47,7 @@ namespace EyeStation
             {
                 VesselSegmentatioMethodType = VesselSegmentatioMethod.Thresholding
             };
+            vesselMeasurements = new VesselMeasurements();
             List<Study> items = new List<Study>();
             items = serwer.GetStudies();
             lvStudy.ItemsSource = items;
@@ -67,6 +70,7 @@ namespace EyeStation
         private Line startLine;
         private Canvas actualCanvas;
         private VesselSegmentator vesselSegmentator;
+        private VesselMeasurements vesselMeasurements;
         private BitmapImage imageSource;
         private StudyDrawing studyDrawing;
         private Study actualStudy;
@@ -751,7 +755,6 @@ namespace EyeStation
             ibGreen.ImageSource = BitmapWriter.Bitmap2BitmapImage(greenCanal);
             cnvGreen.Background = ibGreen;
 
-            cnvMaskAndImage.Background = ib;
             //TEMPORARY
             vesselSegmentator.SetInput(BitmapWriter.BitmapImage2Bitmap(image));
             vesselSegmentator.Calculate();
@@ -761,6 +764,12 @@ namespace EyeStation
             cnvMask.Background = ibMask;
 
             //END TEMPORARTY
+
+            vesselMeasurements.SetInput(vesselSegmentator.Result);
+            Bitmap result2 = vesselMeasurements.Calculate();
+            ImageBrush ibMaskAndImage = new ImageBrush();
+            ibMaskAndImage.ImageSource = BitmapWriter.Bitmap2BitmapImage(result2);
+            cnvMaskAndImage.Background = ibMaskAndImage;
         }
 
         private void saveAllStudyDrawing()
@@ -835,6 +844,84 @@ namespace EyeStation
                     lvStudy.SelectedIndex = index;
                 }
             }
+        }
+
+        private void SlBright_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (imageSource != null)
+            {
+                Bitmap inputImage = BitmapWriter.BitmapImage2Bitmap(imageSource);
+                Bitmap outputImage = AdjustBrightness(inputImage, (int)slBright.Value * 5);
+
+                ImageBrush imageBrush = new ImageBrush();
+                imageBrush.ImageSource = BitmapWriter.Bitmap2BitmapImage(outputImage);
+                cnvSmall.Background = imageBrush;
+                cnvBig.Background = imageBrush;
+            }
+        }
+
+        private Bitmap AdjustBrightness(Bitmap inputBitmap, int value)
+        {
+            Bitmap newBitmap = new Bitmap(inputBitmap.Width, inputBitmap.Height);
+            Graphics graphics = Graphics.FromImage(newBitmap);
+
+            float finalValue = (float)value / 255.0f;
+            ColorMatrix colorMatrix = new ColorMatrix(new float[][] {
+                    new float[] {1, 0, 0, 0, 0},
+                    new float[] {0, 1, 0, 0, 0},
+                    new float[] {0, 0, 1, 0, 0},
+                    new float[] {0, 0, 0, 1, 0},
+                    new float[] { finalValue, finalValue, finalValue, 1, 1}
+                });
+
+            ImageAttributes imageAttributes = new ImageAttributes();
+            imageAttributes.SetColorMatrix(colorMatrix);
+            graphics.DrawImage(inputBitmap, new System.Drawing.Rectangle(0, 0, inputBitmap.Width, inputBitmap.Height), 
+                0, 0, inputBitmap.Width, inputBitmap.Height, GraphicsUnit.Pixel, imageAttributes);
+
+            imageAttributes.Dispose();
+            graphics.Dispose();
+
+            return newBitmap;
+        }
+
+        private void SlContrast_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (imageSource != null)
+            {
+                Bitmap inputImage = BitmapWriter.BitmapImage2Bitmap(imageSource);
+                Bitmap outputImage = AdjustContrast(inputImage, (int)slContrast.Value * 5);
+
+                ImageBrush imageBrush = new ImageBrush();
+                imageBrush.ImageSource = BitmapWriter.Bitmap2BitmapImage(outputImage);
+                cnvSmall.Background = imageBrush;
+                cnvBig.Background = imageBrush;
+            }
+        }
+
+        private Bitmap AdjustContrast(Bitmap inputBitmap, int value)
+        {
+            Bitmap newBitmap = new Bitmap(inputBitmap.Width, inputBitmap.Height);
+            Graphics graphics = Graphics.FromImage(newBitmap);
+
+            float finalValue = 0.04f * (float)value;
+            ColorMatrix colorMatrix = new ColorMatrix(new float[][] {
+                    new float[] { finalValue, 0, 0, 0, 0},
+                    new float[] {0, finalValue, 0, 0, 0},
+                    new float[] {0, 0, finalValue, 0, 0},
+                    new float[] {0, 0, 0, 1, 0},
+                    new float[] {0.001f, 0.001f, 0.001f, 0, 1}
+                });
+
+            ImageAttributes imageAttributes = new ImageAttributes();
+            imageAttributes.SetColorMatrix(colorMatrix);
+            graphics.DrawImage(inputBitmap, new System.Drawing.Rectangle(0, 0, inputBitmap.Width, inputBitmap.Height),
+                0, 0, inputBitmap.Width, inputBitmap.Height, GraphicsUnit.Pixel, imageAttributes);
+
+            imageAttributes.Dispose();
+            graphics.Dispose();
+
+            return newBitmap;
         }
     }
 }

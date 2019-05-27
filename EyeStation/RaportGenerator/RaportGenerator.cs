@@ -20,14 +20,14 @@ namespace EyeStation.RaportGenerator
 
                 using (DocX document = DocX.Create(path))
                 {
-                Paragraph date = document.InsertParagraph();
-                date.Alignment = Alignment.right;
-                date.Append(String.Format("{0:MM.dd.yyyy r.}", DateTime.Now))
-                .Font("Times New Roman")
-                .FontSize(10)
-                .Color(Color.Black);
+                    Paragraph date = document.InsertParagraph();
+                    date.Alignment = Alignment.right;
+                    date.Append(String.Format("{0:MM.dd.yyyy r.}", DateTime.Now))
+                    .Font("Times New Roman")
+                    .FontSize(10)
+                    .Color(Color.Black);
 
-                Paragraph title = document.InsertParagraph();
+                    Paragraph title = document.InsertParagraph();
                     title.Alignment = Alignment.center;
                     title.Append("Raport \r\n\r\n")
                     .Font("Times New Roman")
@@ -61,13 +61,13 @@ namespace EyeStation.RaportGenerator
                     .Font("Times New Roman")
                     .FontSize(12)
                     .Color(Color.Black);
-                    
+
                     Xceed.Words.NET.Image image = document.AddImage(originalImagePath);
                     Picture originalImage = image.CreatePicture();
                     originalImage.Height = 200;
                     originalImage.Width = 200;
                     images.AppendPicture(originalImage);
-                    
+
 
                     Paragraph measurments = document.InsertParagraph();
 
@@ -80,7 +80,7 @@ namespace EyeStation.RaportGenerator
                     t.SetBorder(TableBorderType.Left, new Border(Xceed.Words.NET.BorderStyle.Tcbs_single, BorderSize.one, 1, Color.Black));
                     t.SetBorder(TableBorderType.Right, new Border(Xceed.Words.NET.BorderStyle.Tcbs_single, BorderSize.one, 1, Color.Black));
                     t.SetBorder(TableBorderType.Top, new Border(Xceed.Words.NET.BorderStyle.Tcbs_single, BorderSize.one, 1, Color.Black));
-                    t.Alignment = Alignment.center;                  
+                    t.Alignment = Alignment.center;
 
                     for (int i = 0; i < columns; i++)
                     {
