@@ -16,5 +16,15 @@ namespace EyeStation.Models
         public double Value { get; set; }
 
         public string ActualCanvas { get; set; }
+
+        public MeasureLine() { }
+
+        public MeasureLine(MeasureLine line)
+        {
+            this.Id = line.Id;
+            this.Points = line.Points;
+            this.Value = line.Value;
+            this.ActualCanvas = line.ActualCanvas;
+        }
     }
 }

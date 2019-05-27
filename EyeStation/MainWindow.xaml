@@ -64,43 +64,6 @@
                             Width="20" />
                     </ToggleButton.Content>
                 </ToggleButton>
-
-                <ToggleButton
-                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
-                    IsChecked="False"
-                    ToolTip="Odznacz"
-                    Margin="5,0,5,0"
-                    x:Name="btnUnSelect"
-                    materialDesign:ShadowAssist.ShadowDepth="Depth2" 
-                    IsEnabled="False" 
-                    Checked="btnUnSelect_Checked"
-                    Unchecked="btnUnSelect_Unchecked">
-                    <ToggleButton.Content>
-                        <materialDesign:PackIcon
-                            Kind="EditOff"
-                            Height="20"
-                            Width="20" />
-                    </ToggleButton.Content>
-                </ToggleButton>
-
-                <ToggleButton
-                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
-                    IsChecked="False"
-                    ToolTip="Zaznacz"
-                    Margin="5,0,5,0"
-                    x:Name="btnSelect"
-                    materialDesign:ShadowAssist.ShadowDepth="Depth2" 
-                    IsEnabled="False" 
-                    Checked="btnSelect_Checked"
-                    Unchecked="btnSelect_Unchecked">
-                    <ToggleButton.Content>
-                        <materialDesign:PackIcon
-                            Kind="Edit"
-                            Height="20"
-                            Width="20" />
-                    </ToggleButton.Content>
-                </ToggleButton>
-
                 <ToggleButton
                     Style="{StaticResource MaterialDesignActionLightToggleButton}"
                     IsChecked="False"
@@ -221,6 +184,23 @@
                     Height="40"
                     materialDesign:ShadowAssist.ShadowDepth="Depth3" 
                     Margin="0 20 0 0"
+                    x:Name="btnSegmentation"
+                    IsEnabled="False" Click="btnSegmentationImage_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <materialDesign:PackIcon
+                            Kind="Edit"
+                            Height="24"
+                            Width="24" />
+                        <Label Foreground="#000000">Popraw segmentację</Label>
+                    </StackPanel>
+                </Button>
+
+                <Button
+                    Style="{StaticResource MaterialDesignRaisedLightButton}"
+                    Width="270"
+                    Height="40"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3" 
+                    Margin="0 20 0 0"
                     x:Name="btnAnalysis"
                     IsEnabled="False" Click="btnAnalysis_Click">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -304,7 +284,7 @@
                     </Slider>
                 </Grid>
                 <Grid Grid.Row="1" x:Name="gridCanvas" Margin = "20 0 30 30">
-                    <Grid x:Name="gridOneImage" Visibility="Collapsed">
+                    <Grid x:Name="gridOneImage" Visibility="Hidden">
                         <Canvas x:Name ="cnvBig" 
                             MouseLeftButtonDown="cnv_MouseLeftButtonDown"
                             Grid.Row="0"

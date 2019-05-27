@@ -1,0 +1,77 @@
+﻿<Window x:Class="EyeStation.CustomDialogs.CorrectSegmentationDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EyeStation.CustomDialogs"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="Popraw segmentację naczyń" Height="1000" Width="700"
+        x:Name="window"
+        ResizeMode="NoResize"
+        WindowStyle="SingleBorderWindow">
+    <Grid>
+        <StackPanel>
+            <Grid Background="#05fce5" Height="60" x:Name="gridTab">
+                <WrapPanel Grid.Row="2" HorizontalAlignment="Left" Margin="15,15,0,0">
+                    <ToggleButton
+                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                    IsChecked="True"
+                    ToolTip="Rysuj"
+                    Margin="5,0,5,0"
+                    x:Name="btnDraw"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth2" Checked="btnDraw_Checked" Unchecked="btnDraw_Unchecked">
+                        <ToggleButton.Content>
+                            <materialDesign:PackIcon
+                            Kind="Edit"
+                            Height="20"
+                            Width="20" />
+                        </ToggleButton.Content>
+                    </ToggleButton>
+
+                    <ToggleButton
+                    Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                    IsChecked="False"
+                    ToolTip="Gumuj"
+                    Margin="5,0,5,0"
+                    x:Name="btnErase"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth2" Unchecked="btnErase_Unchecked" Checked="btnErase_Checked">
+                        <ToggleButton.Content>
+                            <materialDesign:PackIcon
+                            Kind="Eraser"
+                            Height="20"
+                            Width="20" />
+                        </ToggleButton.Content>
+                    </ToggleButton>
+                    <Slider
+                    Width="450"
+                    Grid.Column="0"
+                    TickFrequency="5"
+                    Orientation="Horizontal"
+                    Minimum="1"
+                    Maximum="20"
+                    Value="5"
+                    ToolTip="Rozmiar" 
+                    Name="slSize"
+                    Margin="15 5 10 0" Height="19" ValueChanged="slSize_ValueChanged">
+                    </Slider>
+                </WrapPanel>
+            </Grid>
+            <Grid x:Name="gridForImage">
+                <Image x:Name="img" HorizontalAlignment="Left" Height="500" VerticalAlignment="Center" Width="500" />
+                <InkCanvas x:Name="inkCnv" HorizontalAlignment="Left" Height="500" VerticalAlignment="Center" Width="500" EditingMode="Ink" Opacity="0.1">
+                    <InkCanvas.DefaultDrawingAttributes>
+                        <DrawingAttributes x:Name="attribute" Width="5" Height="5" Color="White"/>
+                    </InkCanvas.DefaultDrawingAttributes>
+                </InkCanvas>
+            </Grid>
+            <WrapPanel Grid.Row="2" HorizontalAlignment="Right" Margin="0,15,15,0" Height="45">
+                <Button IsDefault="True" Click ="btnDialogOk_Click" Name="btnDialogOk" MinWidth="60" Margin="0,0,10,0">_Ok</Button>
+                <Button IsCancel="True" MinWidth="60">_Anuluj</Button>
+            </WrapPanel>
+        </StackPanel>
+    </Grid>
+</Window>
