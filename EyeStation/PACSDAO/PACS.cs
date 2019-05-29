@@ -77,7 +77,7 @@ namespace EyeStation.PACSDAO
                     }
                 catch { }
 
-                studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, desc, angles, lengths, markers, path));
+                studies.Add(new EyeStation.Model.Study(p.patientID, p.patientName, p.segmentation_name, desc, angles, lengths, markers, path));
                 //RaportGenerator.RaportGenerator.GenerateRaport(dict, path+".jpg");
             }
             return studies;
@@ -118,18 +118,20 @@ namespace EyeStation.PACSDAO
 
                 string dane;
                 string name;
+                string segmentation_name;
                 Dictionary<string, Dictionary<string, string>> Datas;
 
-                FramesQuery(de.PatientID, out dane, out name, out Datas);
+                FramesQuery(de.PatientID, out dane, out name, out Datas, out segmentation_name);
                 
-                data.Add(new PACSDAO.Patient(de.PatientID, de.PatientName, name, dane, Datas));
+                data.Add(new PACSDAO.Patient(de.PatientID, de.PatientName, name, dane, Datas, segmentation_name));
                 ex1.Add(String.Format("{0}", name));
-             
+                ex1.Add(String.Format("{0}", segmentation_name));
+
             }
             DCMTK.DCM2JPG(ex1);
         }
 
-        private void FramesQuery(string PatientId, out string dane, out string name, out Dictionary<string, Dictionary<string, string>> Datas)
+        private void FramesQuery(string PatientId, out string dane, out string name, out Dictionary<string, Dictionary<string, string>> Datas, out string segmentation_name)
         {
 
             gdcm.ERootType typ = gdcm.ERootType.ePatientRootType;
@@ -171,16 +173,13 @@ namespace EyeStation.PACSDAO
             Datas = new Dictionary<string, Dictionary<string, string>>();
 
             List<string> pliki = new List<string>(System.IO.Directory.EnumerateFiles(dane));  //nazwy plikow
-
-            foreach (String plik in pliki)
-            {
+           
+            //OBRAZ ORYGINALNY
                 gdcm.Reader dataReader = new gdcm.Reader();
-                dataReader.SetFileName(plik);
+                dataReader.SetFileName(pliki[0]);
 
-                if (!dataReader.Read())
-                {
-                    continue;
-                }
+                if (!dataReader.Read()){}
+
                 gdcm.File file = dataReader.GetFile();
                 gdcm.DataSet dataSet = file.GetDataSet();
                 string data = dataSet.toString();
@@ -189,7 +188,7 @@ namespace EyeStation.PACSDAO
                 gdcm.Dict dict = dicts.GetPublicDict();
                 string[] dataArray = dataSet.toString().Split('\n');
                 Dictionary<string, string> dataValues = new Dictionary<string, string>();
-                String[] id = plik.Split('\\');
+                String[] id = pliki[0].Split('\\');
 
                 foreach (string s in dataArray)
                 {
@@ -211,18 +210,34 @@ namespace EyeStation.PACSDAO
 
                 // przeczytaj pixele
                 gdcm.PixmapReader reader = new gdcm.PixmapReader();
-                reader.SetFileName(plik);
-                if (!reader.Read())
-                {
-                    continue;
-                }
+                if (pliki[0].Substring(pliki[0].Length - 4, 4) != ".dcm")
+                    pliki[0] = pliki[0] + ".dcm";
+                reader.SetFileName(pliki[0]);
+                if (!reader.Read()){ }
 
               
-                    name = String.Format("{0}", plik.Substring(0,plik.Length-4));
-                    Datas.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)).Replace("\\","\\\\"), dataValues);
-                
-                
-            }
+                    name = String.Format("{0}", pliki[0].Substring(0,pliki[0].Length-4));
+                    Datas.Add(String.Format("{0}", pliki[0].Substring(0, pliki[0].Length - 4)).Replace("\\","\\\\"), dataValues);
+
+            //OBRAZ SEGMENTACJI
+            gdcm.Reader dataReader2 = new gdcm.Reader();
+            dataReader2.SetFileName(pliki[1]);
+
+            if (!dataReader2.Read()) { }
+
+            gdcm.File file2 = dataReader2.GetFile();
+
+            // przeczytaj pixele
+            gdcm.PixmapReader reader2 = new gdcm.PixmapReader();
+            if (pliki[1].Substring(pliki[1].Length - 4, 4) != ".dcm")
+                pliki[1] = pliki[1] + ".dcm";
+
+            reader2.SetFileName(pliki[1]);
+            if (!reader2.Read()) { }
+
+            segmentation_name = String.Format("{0}", pliki[1].Substring(0, pliki[1].Length - 4));
+
+
         }
 
         private gdcm.DataSetArrayType PatientQuery()
