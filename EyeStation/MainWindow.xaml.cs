@@ -36,6 +36,7 @@ namespace EyeStation
     public partial class MainWindow : Window
     {
         public PACSObj serwer;
+        public List<int> lengths;
 
         public MainWindow()
         {
@@ -670,9 +671,23 @@ namespace EyeStation
              * Okno z informacją o podejrzeniu choroby
              */
             uncheckedAll();
-            string result = "Istnieje podejrzenie retinopatii";
-            SimpleDialog simpleDialog = new SimpleDialog("Analiza retinopatii", result);
-            simpleDialog.ShowDialog();
+            string result = "Nie istnieje podejrzenie retinopatii cukrzycowej ani nadciśnieniowej.";
+            EyeStation.VesselAnalysisFilter.VesselAnaylis vesselAnalysis = new EyeStation.VesselAnalysisFilter.VesselAnaylis(vesselMeasurements.lengths);
+            int result_code = vesselAnalysis.Classify();
+            if (result_code != -1)
+            {
+                if (result_code == 1)
+                    result = "Istnieje podejrzenie retinopatii cukrzycowej.";
+                if (result_code == 2)
+                    result = "Istnieje podejrzenie retinopatii nadciśnieniowej.";
+                SimpleDialog simpleDialog = new SimpleDialog("Analiza retinopatii", result);
+                simpleDialog.ShowDialog();
+            }
+            else
+            {
+                SimpleDialog simpleDialog = new SimpleDialog("Błąd", "Analiza pod kątem retinopatii nie powiodła się.");
+                simpleDialog.ShowDialog();
+            }
         }
 
         private void btnDesription_Click(object sender, RoutedEventArgs e)

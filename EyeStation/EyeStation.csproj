@@ -148,6 +148,7 @@
     <Compile Include="SimpleITK\ImageFileReader.cs" />
     <Compile Include="SimpleITK\ImageFileWriter.cs" />
     <Compile Include="Tools\MeasureTool.cs" />
+    <Compile Include="VesselAnalysisFilter\VesselAnaylis.cs" />
     <Compile Include="VesselSegmentatorFilter\BitmapWriter.cs" />
     <Compile Include="VesselSegmentatorFilter\CanalType.cs" />
     <Compile Include="VesselSegmentatorFilter\PointsPair.cs" />
