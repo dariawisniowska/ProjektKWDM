@@ -17,6 +17,7 @@ namespace EyeStation.VesselsLengthFilter
         Bitmap binaryBitmap;
         private List<Point> endPoints;
         private List<Point> branchPoints;
+        private List<Point> branchAndEndPoints;
         Graphics graphics;
         public List<int> lengths;
 
@@ -24,6 +25,7 @@ namespace EyeStation.VesselsLengthFilter
         {
             endPoints = new List<Point>();
             branchPoints = new List<Point>();
+            branchAndEndPoints = new List<Point>();
         }
 
         public void SetInput(byte[][] input)
@@ -43,8 +45,7 @@ namespace EyeStation.VesselsLengthFilter
         public Bitmap Calculate()
         {
             FindBranchesAndEnds();
-            //TODO:
-            //DetermineLengthFromPointToPoint();
+            DetermineLengthFromPointToPoint();
 
             return originalBitmap;
         }
@@ -101,9 +102,11 @@ namespace EyeStation.VesselsLengthFilter
 
         private void DetermineLengthFromPointToPoint()
         {
+            branchAndEndPoints.AddRange(branchPoints);
+            branchAndEndPoints.AddRange(endPoints);
             List<Tuple<Point, Point, int>> pointPairs = new List<Tuple<Point, Point, int>>();
 
-            foreach (Point startPoint in branchPoints)
+            foreach (Point startPoint in branchAndEndPoints)
             {
                 List<Point> startNeighbors = new List<Point>() {
                             new Point(startPoint.X, startPoint.Y - 1), new Point(startPoint.X - 1, startPoint.Y), new Point(startPoint.X, startPoint.Y + 1),
@@ -115,12 +118,15 @@ namespace EyeStation.VesselsLengthFilter
                 {
                     if (binaryBitmap.GetPixel(startNeighbor.X, startNeighbor.Y) == Color.FromArgb(255, 255, 255))
                     {
+                        Point previousPoint = new Point();
                         Point currentPoint = new Point(startNeighbor.X, startNeighbor.Y);
                         List<Point> visitedPoints = new List<Point>() { startPoint, currentPoint };
                         int length = visitedPoints.Count;
 
-                        while (!(branchPoints.Any(point => point == currentPoint) || endPoints.Any(point => point == currentPoint)))
+                        while (previousPoint != currentPoint && !(branchAndEndPoints.Any(point => point == currentPoint)))
                         {
+                            previousPoint = currentPoint;
+
                             List<Point> currentNeighbors = new List<Point>(){
                                 new Point(currentPoint.X, currentPoint.Y - 1), new Point(currentPoint.X - 1, currentPoint.Y), new Point(currentPoint.X, currentPoint.Y + 1),
                                 new Point(currentPoint.X + 1, currentPoint.Y), new Point(currentPoint.X - 1, currentPoint.Y - 1), new Point(currentPoint.X - 1, currentPoint.Y + 1),
