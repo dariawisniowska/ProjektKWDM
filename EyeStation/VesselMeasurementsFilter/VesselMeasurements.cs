@@ -167,7 +167,8 @@ namespace EyeStation.VesselsLengthFilter
                 float x = (pairPair.Item1.X + pairPair.Item2.X) / 2;
                 float y = (pairPair.Item1.Y + pairPair.Item2.Y) / 2;
                 graphics.DrawString(pairPair.Item3.ToString(), new Font("Tahoma", 6), Brushes.Red, x - 6, y - 6);
-                lengths.Add(Convert.ToInt32(pairPair.Item3.ToString()));
+
+                lengths.Add(pairPair.Item3);
             }
         }
     }
