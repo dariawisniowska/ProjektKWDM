@@ -73,6 +73,8 @@ namespace EyeStation
         private Study actualStudy;
         private JavaScriptSerializer jss;
         private byte[][] maskInBytes;
+        private long actualCanvasItem;
+        private List<CanvasItem> newCanvasItem;
 
         private void btnFourImage_Click(object sender, RoutedEventArgs e)
         {
@@ -80,7 +82,6 @@ namespace EyeStation
             btnOneImage.Visibility = Visibility.Visible;
             gridOneImage.Visibility = Visibility.Collapsed;
             gridFourImage.Visibility = Visibility.Visible;
-            uncheckedAll();
         }
 
         private void btnOneImage_Click(object sender, RoutedEventArgs e)
@@ -89,7 +90,6 @@ namespace EyeStation
             btnFourImage.Visibility = Visibility.Visible;
             gridOneImage.Visibility = Visibility.Visible;
             gridFourImage.Visibility = Visibility.Collapsed;
-            uncheckedAll();
         }
 
         private void btnMeasure_Checked(object sender, RoutedEventArgs e)
@@ -158,6 +158,9 @@ namespace EyeStation
                     Point startPoint = new Point(measurePoints[0].X + 1, measurePoints[0].Y + 1);
                     this.startLine = MeasureTool.createLine(measurePoints[0], startPoint);
                     cnv.Children.Add(this.startLine);
+
+                    actualCanvasItem += 1;
+                    newCanvasItem.Add(new CanvasItem(actualCanvasItem, startLine, cnv.Name, CanvasItemType.Line));
                 }
                 else if (pointCount > 1)
                 {
@@ -165,6 +168,7 @@ namespace EyeStation
                     {
                         Line line = MeasureTool.createLine(measurePoints[pointCount - 2], measurePoints[pointCount - 1]);
                         cnv.Children.Add(line);
+                        newCanvasItem.Add(new CanvasItem(actualCanvasItem, line, cnv.Name, CanvasItemType.Line));
                     }
                     else
                     {
@@ -172,8 +176,10 @@ namespace EyeStation
                         {
                             Line line = MeasureTool.createLine(measurePoints[pointCount - 2], measurePoints[pointCount - 1]);
                             cnv.Children.Add(line);
-                            endOfLine(cnv);
+                            newCanvasItem.Add(new CanvasItem(actualCanvasItem, line, cnv.Name, CanvasItemType.Line));
+                            endOfLine(cnv, true);
                             measurePoints = new List<Point>();
+
                         }
                         else if (this.actualCanvas != cnv)
                         {
@@ -182,14 +188,17 @@ namespace EyeStation
                             else
                             {
                                 this.measurePoints.RemoveAt(pointCount - 1);
-                                endOfLine(this.actualCanvas);
+                                endOfLine(this.actualCanvas, true);
                             }
+                            RemoveLastCanvasItems();
                             measurePoints = new List<Point>();
                             this.measurePoints.Add(e.GetPosition(cnv));
                             this.actualCanvas = cnv;
                             Point startPoint = new Point(measurePoints[0].X + 1, measurePoints[0].Y + 1);
                             this.startLine = MeasureTool.createLine(measurePoints[0], startPoint);
                             cnv.Children.Add(this.startLine);
+                            actualCanvasItem += 1;
+                            newCanvasItem.Add(new CanvasItem(actualCanvasItem, startLine, cnv.Name, CanvasItemType.Line));
                         }
                     }
                 }
@@ -204,19 +213,25 @@ namespace EyeStation
                     Point startPoint = new Point(anglePoints[0].X + 1, anglePoints[0].Y + 1);
                     this.startLine = MeasureTool.createLine(anglePoints[0], startPoint);
                     cnv.Children.Add(this.startLine);
+
+                    actualCanvasItem += 1;
+                    newCanvasItem.Add(new CanvasItem(actualCanvasItem, startLine, cnv.Name, CanvasItemType.Angle));
                 }
                 else if (pointCount == 2 && this.actualCanvas == cnv)
                 {
                     this.line = MeasureTool.createLine(anglePoints[pointCount - 2], anglePoints[pointCount - 1]);
                     cnv.Children.Add(line);
+                    newCanvasItem.Add(new CanvasItem(actualCanvasItem, line, cnv.Name, CanvasItemType.Angle));
                 }
                 else if (pointCount == 3 && this.actualCanvas == cnv)
                 {
                     this.line = MeasureTool.createLine(anglePoints[pointCount - 2], anglePoints[pointCount - 1]);
                     cnv.Children.Add(line);
+                    newCanvasItem.Add(new CanvasItem(actualCanvasItem, line, cnv.Name, CanvasItemType.Angle));
                     double angleValue = MeasureTool.getAngleValue(this.anglePoints);
                     TextBlock textBlock = MeasureTool.createTextBlockForAngle(this.anglePoints, angleValue);
                     cnv.Children.Add(textBlock);
+                    newCanvasItem.Add(new CanvasItem(actualCanvasItem, textBlock, cnv.Name, CanvasItemType.Angle));
 
                     Angle angle = new Angle();
                     angle.Id = studyDrawing.AngleList.Count + 1;
@@ -228,12 +243,13 @@ namespace EyeStation
                     {
                         Angle smallAngle = new Angle(angle);
                         List<Point> newPoints = new List<Point>();
-                        foreach (Point point in angle.Points) {
+                        foreach (Point point in angle.Points)
+                        {
                             newPoints.Add(bigToSmallPoint(point));
                         }
                         smallAngle.Points = newPoints;
                         smallAngle.ActualCanvas = "cnvSmall";
-                        drawAngles(smallAngle);
+                        drawAngles(smallAngle, true);
                         studyDrawing.AngleList.Add(smallAngle);
                     }
                     else if (cnv.Name == "cnvSmall")
@@ -246,7 +262,7 @@ namespace EyeStation
                         }
                         bigAngle.Points = newPoints;
                         bigAngle.ActualCanvas = "cnvBig";
-                        drawAngles(bigAngle);
+                        drawAngles(bigAngle, true);
                         studyDrawing.AngleList.Add(angle);
                     }
                     else
@@ -268,12 +284,15 @@ namespace EyeStation
                         this.actualCanvas.Children.Remove(this.line);
                         this.actualCanvas.Children.Remove(this.startLine);
                     }
+                    RemoveLastCanvasItems();
                     this.actualCanvas = cnv;
                     this.anglePoints = new List<Point>();
                     this.anglePoints.Add(e.GetPosition(cnv));
                     Point startPoint = new Point(anglePoints[0].X + 1, anglePoints[0].Y + 1);
                     this.startLine = MeasureTool.createLine(anglePoints[0], startPoint);
                     cnv.Children.Add(this.startLine);
+                    actualCanvasItem += 1;
+                    newCanvasItem.Add(new CanvasItem(actualCanvasItem, startLine, cnv.Name, CanvasItemType.Angle));
                 }
             }
             if (isMarkerTool)
@@ -288,13 +307,13 @@ namespace EyeStation
                     marker.Point = point;
                     marker.Description = inputDialog.Answer;
                     marker.ActualCanvas = cnv.Name;
-                    drawMarker(marker, cnv);
+                    drawMarker(marker, cnv, false);
                     if (cnv.Name == "cnvBig")
                     {
                         Marker smallMarker = new Marker(marker);
                         smallMarker.Point = bigToSmallPoint(marker.Point);
                         smallMarker.ActualCanvas = "cnvSmall";
-                        drawMarker(smallMarker, cnvSmall);
+                        drawMarker(smallMarker, cnvSmall, true);
                         studyDrawing.MarkerList.Add(smallMarker);
                     }
                     else if (cnv.Name == "cnvSmall")
@@ -302,7 +321,7 @@ namespace EyeStation
                         Marker bigMarker = new Marker(marker);
                         bigMarker.Point = smallToBigPoint(marker.Point);
                         bigMarker.ActualCanvas = "cnvBig";
-                        drawMarker(bigMarker, cnvBig);
+                        drawMarker(bigMarker, cnvBig, true);
                         studyDrawing.MarkerList.Add(marker);
                     }
                     else
@@ -319,12 +338,13 @@ namespace EyeStation
             return MeasureTool.toActualPoint(realPoint.X, realPoint.Y, imageSource.PixelHeight, cnvBig.Height);
         }
 
-        private Point bigToSmallPoint(Point point) {
+        private Point bigToSmallPoint(Point point)
+        {
             Point realPoint = MeasureTool.toRealPoint(point.X, point.Y, imageSource.PixelHeight, cnvBig.Height);
             return MeasureTool.toActualPoint(realPoint.X, realPoint.Y, imageSource.PixelHeight, cnvSmall.Height);
         }
 
-        private void drawMarker(Marker marker, Canvas cnv)
+        private void drawMarker(Marker marker, Canvas cnv, Boolean isSecondDraw)
         {
             if (cnv == null)
                 cnv = getActualCanvas(marker.ActualCanvas);
@@ -344,9 +364,16 @@ namespace EyeStation
             Canvas.SetTop(textBlock, marker.Point.Y - 5);
             textBlock.ToolTip = tt;
             cnv.Children.Add(textBlock);
+            if (studyDrawing.Modyfied == true)
+            {
+                if (!isSecondDraw)
+                    actualCanvasItem += 1;
+                newCanvasItem.Add(new CanvasItem(actualCanvasItem, elipse, cnv.Name, CanvasItemType.Marker));
+                newCanvasItem.Add(new CanvasItem(actualCanvasItem, textBlock, cnv.Name, CanvasItemType.Marker));
+            }
         }
 
-        private void drawAngles(Angle angle)
+        private void drawAngles(Angle angle, bool isDeletable)
         {
             List<Point> points = angle.Points;
             int pointCount = points.Count;
@@ -358,9 +385,15 @@ namespace EyeStation
             cnv.Children.Add(secondLine);
             TextBlock textBlock = MeasureTool.createTextBlockForAngle(points, angle.Value);
             cnv.Children.Add(textBlock);
+            if (isDeletable)
+            {
+                newCanvasItem.Add(new CanvasItem(actualCanvasItem, firstLine, cnv.Name, CanvasItemType.Angle));
+                newCanvasItem.Add(new CanvasItem(actualCanvasItem, secondLine, cnv.Name, CanvasItemType.Angle));
+                newCanvasItem.Add(new CanvasItem(actualCanvasItem, textBlock, cnv.Name, CanvasItemType.Angle));
+            }
         }
 
-        private void endOfLine(Canvas cnv)
+        private void endOfLine(Canvas cnv, bool isDeletable)
         {
             int srcHeight = this.imageSource.PixelHeight;
             double actualHeight = 0;
@@ -373,6 +406,7 @@ namespace EyeStation
             double lineLength = MeasureTool.getLengthValue(this.measurePoints, srcHeight, actualHeight, pixelSize);
             TextBlock textBlock = MeasureTool.createTextBlockForLine(this.measurePoints, lineLength);
             cnv.Children.Add(textBlock);
+            newCanvasItem.Add(new CanvasItem(actualCanvasItem, textBlock, cnv.Name, CanvasItemType.Line));
 
             MeasureLine mLine = new MeasureLine();
             mLine.Id = studyDrawing.LineList.Count + 1;
@@ -390,7 +424,7 @@ namespace EyeStation
                 }
                 smallLine.Points = newPoints;
                 smallLine.ActualCanvas = "cnvSmall";
-                drawLine(smallLine);
+                drawLine(smallLine, isDeletable);
                 studyDrawing.LineList.Add(smallLine);
             }
             else if (cnv.Name == "cnvSmall")
@@ -403,7 +437,7 @@ namespace EyeStation
                 }
                 bigLine.Points = newPoints;
                 bigLine.ActualCanvas = "cnvBig";
-                drawLine(bigLine);
+                drawLine(bigLine, isDeletable);
                 studyDrawing.LineList.Add(mLine);
             }
             else
@@ -413,7 +447,7 @@ namespace EyeStation
             studyDrawing.Modyfied = true;
         }
 
-        private void drawLine(MeasureLine measureLine)
+        private void drawLine(MeasureLine measureLine, bool isDeletable)
         {
             List<Point> points = measureLine.Points;
             int pointCount = points.Count;
@@ -422,10 +456,14 @@ namespace EyeStation
             {
                 Line line = MeasureTool.createLine(points[i - 1], points[i]);
                 cnv.Children.Add(line);
+                if (isDeletable)
+                    newCanvasItem.Add(new CanvasItem(actualCanvasItem, line, cnv.Name, CanvasItemType.Line));
                 if (i == pointCount - 1)
                 {
                     TextBlock textBlock = MeasureTool.createTextBlockForLine(points, measureLine.Value);
                     cnv.Children.Add(textBlock);
+                    if (isDeletable)
+                        newCanvasItem.Add(new CanvasItem(actualCanvasItem, textBlock, cnv.Name, CanvasItemType.Line));
                 }
             }
         }
@@ -479,6 +517,8 @@ namespace EyeStation
                     saveAllStudyDrawing();
 
                     displayImage(new BitmapImage(study.ImageSource.UriSource));
+                    newCanvasItem = new List<CanvasItem>();
+                    actualCanvasItem = 0;
 
                     btnBack.Visibility = Visibility.Visible;
                     selectStudyPanel.Visibility = Visibility.Collapsed;
@@ -503,13 +543,13 @@ namespace EyeStation
                         foreach (Marker marker in studyDrawing.MarkerList)
                         {
                             marker.Point = MeasureTool.toActualPoint(marker.Point.X, marker.Point.Y, imageSource.PixelHeight, cnvSmall.Height);
-                            drawMarker(marker, null);
+                            drawMarker(marker, null, false);
                             if (marker.ActualCanvas == "cnvSmall")
                             {
                                 Marker bigMarker = new Marker(marker);
                                 bigMarker.Point = smallToBigPoint(marker.Point);
                                 bigMarker.ActualCanvas = "cnvBig";
-                                drawMarker(bigMarker, null);
+                                drawMarker(bigMarker, null, true);
                             }
                         }
                     }
@@ -526,7 +566,7 @@ namespace EyeStation
                                 Point actualPoint = MeasureTool.toActualPoint(angle.Points[i].X, angle.Points[i].Y, imageSource.PixelHeight, cnvSmall.Height);
                                 angle.Points[i] = actualPoint;
                             }
-                            drawAngles(angle);
+                            drawAngles(angle, false);
                             if (angle.ActualCanvas == "cnvSmall")
                             {
                                 List<Point> newPoints = new List<Point>();
@@ -537,7 +577,7 @@ namespace EyeStation
                                 Angle bigAngle = new Angle(angle);
                                 bigAngle.Points = newPoints;
                                 bigAngle.ActualCanvas = "cnvBig";
-                                drawAngles(bigAngle);
+                                drawAngles(bigAngle, false);
                             }
                         }
                     }
@@ -554,7 +594,7 @@ namespace EyeStation
                                 Point actualPoint = MeasureTool.toActualPoint(line.Points[i].X, line.Points[i].Y, imageSource.PixelHeight, cnvSmall.Height);
                                 line.Points[i] = actualPoint;
                             }
-                            drawLine(line);
+                            drawLine(line, false);
                             if (line.ActualCanvas == "cnvSmall")
                             {
                                 List<Point> newPoints = new List<Point>();
@@ -565,7 +605,7 @@ namespace EyeStation
                                 MeasureLine bigLine = new MeasureLine(line);
                                 bigLine.Points = newPoints;
                                 bigLine.ActualCanvas = "cnvBig";
-                                drawLine(bigLine);
+                                drawLine(bigLine, false);
                             }
                         }
                     }
@@ -713,6 +753,7 @@ namespace EyeStation
 
         private void makeEnableAll()
         {
+            btnRemoveLast.IsEnabled = true;
             btnMeasure.IsEnabled = true;
             btnAngle.IsEnabled = true;
             btnAddMarker.IsEnabled = true;
@@ -926,6 +967,52 @@ namespace EyeStation
                     lvStudy.ItemsSource = serwer.GetStudies();
                     lvStudy.SelectedIndex = index;
                 }
+            }
+        }
+
+        private CanvasItemType RemoveLastCanvasItems()
+        {
+            measurePoints = new List<Point>();
+            anglePoints = new List<Point>();
+            CanvasItemType type = CanvasItemType.None;
+            List<int> indexToRemove = new List<int>();
+            for(int i = 0; i < newCanvasItem.Count(); i++)
+            {
+                if (newCanvasItem[i].Id == actualCanvasItem)
+                {
+                    type = newCanvasItem[i].Type;
+                    Canvas cnv = getActualCanvas(newCanvasItem[i].ActualCanvas);
+                    cnv.Children.Remove(newCanvasItem[i].Element);
+                    indexToRemove.Add(i);
+                }
+            }
+            for (int i = indexToRemove.Count - 1; i > 0; i--)
+            {
+                newCanvasItem.RemoveAt(indexToRemove[i]);
+            }
+            if (actualCanvasItem != 0)
+                actualCanvasItem -= 1;
+
+            return type;
+        }
+        private void btnRemoveLast_Click(object sender, RoutedEventArgs e)
+        {
+            CanvasItemType type = RemoveLastCanvasItems();
+            switch (type)
+            {
+                case CanvasItemType.Line:
+                    if(studyDrawing.LineList.Count() != 0)
+                        studyDrawing.LineList.RemoveAt(studyDrawing.LineList.Count() - 1);
+                    break;
+                case CanvasItemType.Angle:
+                    if (studyDrawing.AngleList.Count() != 0)
+                        studyDrawing.AngleList.RemoveAt(studyDrawing.AngleList.Count() - 1);
+                    break;
+                case CanvasItemType.Marker:
+                    if (studyDrawing.MarkerList.Count() != 0)
+                        studyDrawing.MarkerList.RemoveAt(studyDrawing.MarkerList.Count() - 1);
+                    break;
+
             }
         }
     }

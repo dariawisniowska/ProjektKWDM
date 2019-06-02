@@ -134,6 +134,8 @@
       <DependentUpon>SimpleDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\Angle.cs" />
+    <Compile Include="Models\CanvasItem.cs" />
+    <Compile Include="Models\CanvasItemType.cs" />
     <Compile Include="Models\CanvasType.cs" />
     <Compile Include="Models\MeasureLine.cs" />
     <Compile Include="Models\Marker.cs" />
