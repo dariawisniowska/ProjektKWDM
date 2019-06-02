@@ -976,7 +976,7 @@ namespace EyeStation
             anglePoints = new List<Point>();
             CanvasItemType type = CanvasItemType.None;
             List<int> indexToRemove = new List<int>();
-            for(int i = 0; i < newCanvasItem.Count(); i++)
+            for (int i = 0; i < newCanvasItem.Count(); i++)
             {
                 if (newCanvasItem[i].Id == actualCanvasItem)
                 {
@@ -1001,7 +1001,7 @@ namespace EyeStation
             switch (type)
             {
                 case CanvasItemType.Line:
-                    if(studyDrawing.LineList.Count() != 0)
+                    if (studyDrawing.LineList.Count() != 0)
                         studyDrawing.LineList.RemoveAt(studyDrawing.LineList.Count() - 1);
                     break;
                 case CanvasItemType.Angle:
@@ -1012,7 +1012,6 @@ namespace EyeStation
                     if (studyDrawing.MarkerList.Count() != 0)
                         studyDrawing.MarkerList.RemoveAt(studyDrawing.MarkerList.Count() - 1);
                     break;
-
             }
         }
     }
