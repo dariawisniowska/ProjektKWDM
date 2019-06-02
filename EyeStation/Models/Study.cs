@@ -19,6 +19,8 @@ namespace EyeStation.Model
 
         public string Name { get; set; }
 
+        public string SegmentationName { get; set; }
+
         public string FilePath { get; set; }
 
         public string Description { get; set; }
@@ -31,7 +33,9 @@ namespace EyeStation.Model
 
         public BitmapImage ImageSource { get; set; }
 
-        public Study(string id, string name, string description, string angles, string lengths, string markers, string filePath)
+        public BitmapImage SegmentationImageSource { get; set; }
+
+        public Study(string id, string name, string segmentationName, string description, string angles, string lengths, string markers, string filePath)
         {
             this.Id = id;
             this.Name = name;
@@ -40,13 +44,22 @@ namespace EyeStation.Model
             this.Lengths = lengths;
             this.Markers = markers;
             this.Description = description;
+            this.SegmentationName = segmentationName;
             try
             {
-                this.ImageSource = new BitmapImage(new Uri(filePath+".jpg"));
+                this.ImageSource = new BitmapImage(new Uri(filePath + ".jpg"));
             }
             catch
             {
                 this.ImageSource = null;
+            }
+            try
+            {
+                this.SegmentationImageSource = new BitmapImage(new Uri(System.IO.Directory.GetCurrentDirectory() + segmentationName.Remove(0, 1) + ".jpg"));
+            }
+            catch
+            {
+                this.SegmentationImageSource = null;
             }
         }
         public static bool EditAngles(PACSObj serwer, EyeStation.Model.Study studyToEdit, string value)
@@ -77,6 +90,11 @@ namespace EyeStation.Model
             bool result = serwer.Store(studyToEdit.FilePath+".dcm");
 
             return result;
+        }
+
+        private static bool EditSegmentation(PACSObj serwer, EyeStation.Model.Study studyToEdit)
+        {
+            return true;
         }
 
         private static string replacePolishSymbols(string s)

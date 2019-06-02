@@ -274,25 +274,27 @@
                     </Grid.ColumnDefinitions>
                     <Slider
                         Grid.Column="0"
-                        TickFrequency="5"
+                        TickFrequency="1"
                         Orientation="Horizontal"
-                        Minimum="1"
-                        Maximum="50"
-                        Value="25"
+                        Minimum="0"
+                        Maximum="10"
+                        Value="5"
                         ToolTip="Jasność" 
                         Name="slBright"
-                        Margin="0 15 10 0">
+                        Margin="0 15 10 0"
+                        ValueChanged="SlBright_ValueChanged">
                     </Slider>
                     <Slider
                         Grid.Column="1"
-                        TickFrequency="5"
+                        TickFrequency="1"
                         Orientation="Horizontal"
-                        Minimum="1"
-                        Maximum="50"
-                        Value="25"
+                        Minimum="0"
+                        Maximum="10"
+                        Value="5"
                         ToolTip="Kontrast" 
                         Name="slContrast"
-                        Margin="10 15 0 0">
+                        Margin="10 15 0 0"
+                        ValueChanged="SlContrast_ValueChanged">
                     </Slider>
                 </Grid>
                 <Grid Grid.Row="1" x:Name="gridCanvas" Margin = "20 0 30 30">

@@ -2,18 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
-using MaterialDesignThemes.Wpf;
 using EyeStation.Model;
 using EyeStation.Tools;
 using System.Drawing;
@@ -25,6 +19,8 @@ using System.IO;
 using VesselSegmentatorFilter;
 using EyeStation.VesselSegmentatorFilter;
 using System.Web.Script.Serialization;
+using EyeStation.VesselsLengthFilter;
+using System.Drawing.Imaging;
 
 namespace EyeStation
 {
@@ -34,6 +30,7 @@ namespace EyeStation
     public partial class MainWindow : Window
     {
         public PACSObj serwer;
+        public List<int> lengths;
 
         public MainWindow()
         {
@@ -45,6 +42,7 @@ namespace EyeStation
             {
                 VesselSegmentatioMethodType = VesselSegmentatioMethod.Thresholding
             };
+            vesselMeasurements = new VesselMeasurements();
             List<Study> items = new List<Study>();
             items = serwer.GetStudies();
             lvStudy.ItemsSource = items;
@@ -67,6 +65,7 @@ namespace EyeStation
         private Line startLine;
         private Canvas actualCanvas;
         private VesselSegmentator vesselSegmentator;
+        private VesselMeasurements vesselMeasurements;
         private BitmapImage imageSource;
         private BitmapImage maskImage;
         private StudyDrawing studyDrawing;
@@ -706,9 +705,23 @@ namespace EyeStation
              * Okno z informacją o podejrzeniu choroby
              */
             uncheckedAll();
-            string result = "Istnieje podejrzenie retinopatii";
-            SimpleDialog simpleDialog = new SimpleDialog("Analiza retinopatii", result);
-            simpleDialog.ShowDialog();
+            string result = "Nie istnieje podejrzenie retinopatii cukrzycowej ani nadciśnieniowej.";
+            EyeStation.VesselAnalysisFilter.VesselAnaylis vesselAnalysis = new EyeStation.VesselAnalysisFilter.VesselAnaylis(vesselMeasurements.lengths);
+            int result_code = vesselAnalysis.Classify();
+            if (result_code != -1)
+            {
+                if (result_code == 1)
+                    result = "Istnieje podejrzenie retinopatii cukrzycowej.";
+                if (result_code == 2)
+                    result = "Istnieje podejrzenie retinopatii nadciśnieniowej.";
+                SimpleDialog simpleDialog = new SimpleDialog("Analiza retinopatii", result);
+                simpleDialog.ShowDialog();
+            }
+            else
+            {
+                SimpleDialog simpleDialog = new SimpleDialog("Błąd", "Analiza pod kątem retinopatii nie powiodła się.");
+                simpleDialog.ShowDialog();
+            }
         }
 
         private void btnDesription_Click(object sender, RoutedEventArgs e)
@@ -882,7 +895,6 @@ namespace EyeStation
             ibGreen.ImageSource = BitmapWriter.Bitmap2BitmapImage(greenCanal);
             cnvGreen.Background = ibGreen;
 
-            cnvMaskAndImage.Background = ib;
             //TEMPORARY
             vesselSegmentator.SetInput(BitmapWriter.BitmapImage2Bitmap(image));
             vesselSegmentator.Calculate();
@@ -894,6 +906,12 @@ namespace EyeStation
             cnvMask.Background = ibMask;
 
             //END TEMPORARTY
+
+            vesselMeasurements.SetInput(vesselSegmentator.Result);
+            Bitmap result2 = vesselMeasurements.Calculate();
+            ImageBrush ibMaskAndImage = new ImageBrush();
+            ibMaskAndImage.ImageSource = BitmapWriter.Bitmap2BitmapImage(result2);
+            cnvMaskAndImage.Background = ibMaskAndImage;
         }
 
         private void saveAllStudyDrawing()
@@ -1013,6 +1031,84 @@ namespace EyeStation
                         studyDrawing.MarkerList.RemoveAt(studyDrawing.MarkerList.Count() - 1);
                     break;
             }
+        }
+
+        private void SlBright_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (imageSource != null)
+            {
+                Bitmap inputImage = BitmapWriter.BitmapImage2Bitmap(imageSource);
+                Bitmap outputImage = AdjustBrightness(inputImage, (int)slBright.Value * 5);
+
+                ImageBrush imageBrush = new ImageBrush();
+                imageBrush.ImageSource = BitmapWriter.Bitmap2BitmapImage(outputImage);
+                cnvSmall.Background = imageBrush;
+                cnvBig.Background = imageBrush;
+            }
+        }
+
+        private Bitmap AdjustBrightness(Bitmap inputBitmap, int value)
+        {
+            Bitmap newBitmap = new Bitmap(inputBitmap.Width, inputBitmap.Height);
+            Graphics graphics = Graphics.FromImage(newBitmap);
+
+            float finalValue = (float)value / 255.0f;
+            ColorMatrix colorMatrix = new ColorMatrix(new float[][] {
+                    new float[] {1, 0, 0, 0, 0},
+                    new float[] {0, 1, 0, 0, 0},
+                    new float[] {0, 0, 1, 0, 0},
+                    new float[] {0, 0, 0, 1, 0},
+                    new float[] { finalValue, finalValue, finalValue, 1, 1}
+                });
+
+            ImageAttributes imageAttributes = new ImageAttributes();
+            imageAttributes.SetColorMatrix(colorMatrix);
+            graphics.DrawImage(inputBitmap, new System.Drawing.Rectangle(0, 0, inputBitmap.Width, inputBitmap.Height), 
+                0, 0, inputBitmap.Width, inputBitmap.Height, GraphicsUnit.Pixel, imageAttributes);
+
+            imageAttributes.Dispose();
+            graphics.Dispose();
+
+            return newBitmap;
+        }
+
+        private void SlContrast_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (imageSource != null)
+            {
+                Bitmap inputImage = BitmapWriter.BitmapImage2Bitmap(imageSource);
+                Bitmap outputImage = AdjustContrast(inputImage, (int)slContrast.Value * 5);
+
+                ImageBrush imageBrush = new ImageBrush();
+                imageBrush.ImageSource = BitmapWriter.Bitmap2BitmapImage(outputImage);
+                cnvSmall.Background = imageBrush;
+                cnvBig.Background = imageBrush;
+            }
+        }
+
+        private Bitmap AdjustContrast(Bitmap inputBitmap, int value)
+        {
+            Bitmap newBitmap = new Bitmap(inputBitmap.Width, inputBitmap.Height);
+            Graphics graphics = Graphics.FromImage(newBitmap);
+
+            float finalValue = 0.04f * (float)value;
+            ColorMatrix colorMatrix = new ColorMatrix(new float[][] {
+                    new float[] { finalValue, 0, 0, 0, 0},
+                    new float[] {0, finalValue, 0, 0, 0},
+                    new float[] {0, 0, finalValue, 0, 0},
+                    new float[] {0, 0, 0, 1, 0},
+                    new float[] {0.001f, 0.001f, 0.001f, 0, 1}
+                });
+
+            ImageAttributes imageAttributes = new ImageAttributes();
+            imageAttributes.SetColorMatrix(colorMatrix);
+            graphics.DrawImage(inputBitmap, new System.Drawing.Rectangle(0, 0, inputBitmap.Width, inputBitmap.Height),
+                0, 0, inputBitmap.Width, inputBitmap.Height, GraphicsUnit.Pixel, imageAttributes);
+
+            imageAttributes.Dispose();
+            graphics.Dispose();
+
+            return newBitmap;
         }
     }
 }

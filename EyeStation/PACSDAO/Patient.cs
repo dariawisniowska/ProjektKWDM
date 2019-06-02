@@ -13,14 +13,16 @@ namespace EyeStation.PACSDAO
         public string name;
         public Dictionary<string, Dictionary<string, string>> datas;
         public string path;
+        public string segmentation_name;
 
-        public Patient(string patientID, string patientName, string name, string path, Dictionary<string, Dictionary<string, string>> datas)
+        public Patient(string patientID, string patientName, string name, string path, Dictionary<string, Dictionary<string, string>> datas, string segmentation_name)
         {
             this.path = path;
             this.patientID = patientID;
             this.name = name;
             this.patientName = patientName;
             this.datas = datas;
+            this.segmentation_name = segmentation_name;
         }
     }
 

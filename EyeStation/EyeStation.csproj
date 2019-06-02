@@ -92,8 +92,8 @@
     <Reference Include="MaterialDesignColors, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignColors.1.1.3\lib\net45\MaterialDesignColors.dll</HintPath>
     </Reference>
-    <Reference Include="MaterialDesignThemes.Wpf, Version=2.5.0.1205, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MaterialDesignThemes.2.5.0.1205\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
+    <Reference Include="MaterialDesignThemes.Wpf, Version=2.5.1.1345, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignThemes.2.5.1\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="SimpleITKCSharpManaged, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <HintPath>..\packages\SimpleITK-win32-CSharp-x86.1.0.0.1\lib\SimpleITKCSharpManaged.dll</HintPath>
@@ -146,7 +146,11 @@
     <Compile Include="PACSDAO\PACS.cs" />
     <Compile Include="PACSDAO\Patient.cs" />
     <Compile Include="RaportGenerator\RaportGenerator.cs" />
+    <Compile Include="SimpleITK\BinaryThinningImageFilter.cs" />
+    <Compile Include="SimpleITK\ImageFileReader.cs" />
+    <Compile Include="SimpleITK\ImageFileWriter.cs" />
     <Compile Include="Tools\MeasureTool.cs" />
+    <Compile Include="VesselAnalysisFilter\VesselAnaylis.cs" />
     <Compile Include="VesselSegmentatorFilter\BitmapWriter.cs" />
     <Compile Include="VesselSegmentatorFilter\CanalType.cs" />
     <Compile Include="VesselSegmentatorFilter\PointsPair.cs" />
@@ -154,6 +158,7 @@
     <Compile Include="VesselSegmentatorFilter\VesselSegmentatioMethod.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentator.cs" />
     <Compile Include="VesselSegmentatorFilter\VesselSegmentatorConstructorHelper.cs" />
+    <Compile Include="VesselMeasurementsFilter\VesselMeasurements.cs" />
     <Page Include="CustomDialogs\CorrectSegmentationDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -197,7 +202,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
