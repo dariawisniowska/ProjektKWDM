@@ -170,6 +170,7 @@ namespace EyeStation.PACSDAO
             }
             // skasowanie listy zdjęć
             name = "";
+            segmentation_name = "";
             Datas = new Dictionary<string, Dictionary<string, string>>();
 
             List<string> pliki = new List<string>(System.IO.Directory.EnumerateFiles(dane));  //nazwy plikow
@@ -188,8 +189,14 @@ namespace EyeStation.PACSDAO
                 gdcm.Dict dict = dicts.GetPublicDict();
                 string[] dataArray = dataSet.toString().Split('\n');
                 Dictionary<string, string> dataValues = new Dictionary<string, string>();
+
                 String[] id = pliki[0].Split('\\');
 
+            bool first_exp = true;
+            bool first_original = true;
+            foreach (string plik in pliki)
+            {
+                dataValues.Clear();
                 foreach (string s in dataArray)
                 {
                     string[] dataArrayRow = s.Split('\t');
@@ -207,35 +214,69 @@ namespace EyeStation.PACSDAO
 
                     }
                 }
+                if (dataValues["(0020,000d)"].Substring(0,1)=="E" && first_exp==true)
+                {//OBRAZ SEGMENTACJI
+                    gdcm.Reader dataReader2 = new gdcm.Reader();
+                    dataReader2.SetFileName(plik);
 
-                // przeczytaj pixele
-                gdcm.PixmapReader reader = new gdcm.PixmapReader();
-                if (pliki[0].Substring(pliki[0].Length - 4, 4) != ".dcm")
-                    pliki[0] = pliki[0] + ".dcm";
-                reader.SetFileName(pliki[0]);
-                if (!reader.Read()){ }
+                    if (!dataReader2.Read()) { }
 
+                    gdcm.File file2 = dataReader2.GetFile();
+
+                    // przeczytaj pixele
+                    gdcm.PixmapReader reader2 = new gdcm.PixmapReader();
+                    string temp = plik;
+                    if (plik.Substring(plik.Length - 4, 4) != ".dcm")
+                        temp = pliki[1] + ".dcm";
+
+                    reader2.SetFileName(plik);
+                    if (!reader2.Read()) { }
+
+                    segmentation_name = String.Format("{0}", plik.Substring(0, plik.Length - 4));
+                    first_exp = false;
+                }              
+                else
+                {
+                    if (first_original == true)
+                    {
+                        // przeczytaj pixele
+                        gdcm.PixmapReader reader = new gdcm.PixmapReader();
+                        string temp = plik;
+                        if (plik.Substring(plik.Length - 4, 4) != ".dcm")
+                            temp = plik + ".dcm";
+                        reader.SetFileName(plik);
+                        if (!reader.Read()) { }
+                        name = String.Format("{0}", plik.Substring(0, plik.Length - 4));
+                        Datas.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)).Replace("\\", "\\\\"), dataValues);
+                        first_original = false;
+                    }
+                    else
+                    {
+                        gdcm.Reader dataReader2 = new gdcm.Reader();
+                        dataReader2.SetFileName(plik);
+
+                        if (!dataReader2.Read()) { }
+
+                        gdcm.File file2 = dataReader2.GetFile();
+
+                        // przeczytaj pixele
+                        gdcm.PixmapReader reader2 = new gdcm.PixmapReader();
+                        string temp = plik;
+                        if (plik.Substring(plik.Length - 4, 4) != ".dcm")
+                            temp = pliki[1] + ".dcm";
+
+                        reader2.SetFileName(plik);
+                        if (!reader2.Read()) { }
+
+                        segmentation_name = String.Format("{0}", plik.Substring(0, plik.Length - 4));
+                        first_exp = false;
+                    }
+                }
+
+            }         
               
-                    name = String.Format("{0}", pliki[0].Substring(0,pliki[0].Length-4));
-                    Datas.Add(String.Format("{0}", pliki[0].Substring(0, pliki[0].Length - 4)).Replace("\\","\\\\"), dataValues);
 
-            //OBRAZ SEGMENTACJI
-            gdcm.Reader dataReader2 = new gdcm.Reader();
-            dataReader2.SetFileName(pliki[1]);
-
-            if (!dataReader2.Read()) { }
-
-            gdcm.File file2 = dataReader2.GetFile();
-
-            // przeczytaj pixele
-            gdcm.PixmapReader reader2 = new gdcm.PixmapReader();
-            if (pliki[1].Substring(pliki[1].Length - 4, 4) != ".dcm")
-                pliki[1] = pliki[1] + ".dcm";
-
-            reader2.SetFileName(pliki[1]);
-            if (!reader2.Read()) { }
-
-            segmentation_name = String.Format("{0}", pliki[1].Substring(0, pliki[1].Length - 4));
+           
 
 
         }

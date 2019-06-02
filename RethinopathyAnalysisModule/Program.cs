@@ -38,7 +38,7 @@ namespace RethinopathyAnalysisModule
             var HvCsvm = new C_SVC(HvC_prob, KernelHelper.RadialBasisFunctionKernel(gamma), C);
             
             var DvCcva = DvCsvm.GetCrossValidationAccuracy(5);
-            var DvHcva = DvHsvm.GetCrossValidationAccuracy(5);
+            var DvHcva = DvHsvm.GetCrossValidationAccuracy(2);
             var HvCcva = HvCsvm.GetCrossValidationAccuracy(5);
 
             DvCsvm.Export(System.IO.Path.Combine(path, DvC_MODEL_FILE));
