@@ -47,6 +47,20 @@
                 </Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Background="{x:Null}">
+                <Button 
+                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" 
+                    ToolTip="Wróć"
+                    Margin="10,0,10,0"
+                    x:Name="btnRemoveLast"
+                    Visibility="Visible"
+                    Height="25"
+                    Width="25" Click="btnRemoveLast_Click"
+                    IsEnabled="False" >
+                    <materialDesign:PackIcon
+                        Kind="Backspace"
+                        Height="10"
+                        Width="10" />
+                </Button>
                 <ToggleButton
                     Style="{StaticResource MaterialDesignActionLightToggleButton}"
                     IsChecked="False"
