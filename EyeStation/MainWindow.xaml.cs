@@ -749,11 +749,26 @@ namespace EyeStation
 
         private void btnReport_Click(object sender, RoutedEventArgs e)
         {
-            //TO DO:
-            /* 
-             * Automatyczne generowanie raportu z badania
-             */
             uncheckedAll();
+
+            Study study = (Study)lvStudy.SelectedItems[0];
+            saveImagesToPng(study.FilePath+".png");
+            string result = "Nie istnieje podejrzenie retinopatii cukrzycowej ani nadciśnieniowej.";
+            EyeStation.VesselAnalysisFilter.VesselAnaylis vesselAnalysis = new EyeStation.VesselAnalysisFilter.VesselAnaylis(vesselMeasurements.lengths);
+            int result_code = vesselAnalysis.Classify();
+            if (result_code != -1)
+            {
+                if (result_code == 1)
+                    result = "Istnieje podejrzenie retinopatii cukrzycowej.";
+                if (result_code == 2)
+                    result = "Istnieje podejrzenie retinopatii nadciśnieniowej.";
+            }
+            else
+            {
+                result = "Analiza pod kątem retinopatii nie powiodła się.";
+            }
+            RaportGenerator.RaportGenerator.GenerateRaport(study.Tags, study.FilePath, studyDrawing.MarkerList, result);
+
             SimpleDialog simpleDialog = new SimpleDialog("Raport", "Generowanie raportu zakończone powodzeniem.");
             simpleDialog.ShowDialog();
         }

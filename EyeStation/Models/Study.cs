@@ -35,7 +35,9 @@ namespace EyeStation.Model
 
         public BitmapImage SegmentationImageSource { get; set; }
 
-        public Study(string id, string name, string segmentationName, string description, string angles, string lengths, string markers, string filePath)
+        public Dictionary<string, string> Tags { get; set; }
+
+        public Study(string id, string name, Dictionary<string, string> tags, string segmentationName, string description, string angles, string lengths, string markers, string filePath)
         {
             this.Id = id;
             this.Name = name;
@@ -45,6 +47,7 @@ namespace EyeStation.Model
             this.Markers = markers;
             this.Description = description;
             this.SegmentationName = segmentationName;
+            this.Tags = tags;
             try
             {
                 this.ImageSource = new BitmapImage(new Uri(filePath + ".jpg"));

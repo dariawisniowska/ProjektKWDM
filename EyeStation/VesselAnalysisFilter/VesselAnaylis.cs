@@ -24,30 +24,40 @@ namespace EyeStation.VesselAnalysisFilter
 
         public int Classify()
         {
-            if (lengths != null)
+            try
             {
-                var path = Environment.CurrentDirectory.Remove(Environment.CurrentDirectory.Length - 20, 20);
-                path = path + "RethinopathyAnalysisModule\\bin\\Debug\\";
-                SaveTestFile(path);
-                var DvCsvm = new C_SVC(System.IO.Path.Combine(path, DvC_MODEL_FILE));
-                var DvHsvm = new C_SVC(System.IO.Path.Combine(path, DvH_MODEL_FILE));
-                var HvCsvm = new C_SVC(System.IO.Path.Combine(path, HvC_MODEL_FILE));
-                var prob = ProblemHelper.ReadProblem(System.IO.Path.Combine(path, TEST_FILE));
-                DvCsvm.Predict(prob.x[0]);
-                if (path == "")
-                    return 1;
+                if (lengths != null)
+                {
+                    var path = Environment.CurrentDirectory.Remove(Environment.CurrentDirectory.Length - 20, 20);
+                    path = path + "RethinopathyAnalysisModule\\bin\\Debug\\";
+                    SaveTestFile(path);
+                    var DvCsvm = new C_SVC(System.IO.Path.Combine(path, DvC_MODEL_FILE));
+                    var DvHsvm = new C_SVC(System.IO.Path.Combine(path, DvH_MODEL_FILE));
+                    var HvCsvm = new C_SVC(System.IO.Path.Combine(path, HvC_MODEL_FILE));
+                    var prob = ProblemHelper.ReadProblem(System.IO.Path.Combine(path, TEST_FILE));
+                    DvCsvm.Predict(prob.x[0]);
+                    if (path == "")
+                        return 1;
+                    else
+                        return 0;
+                }
                 else
-                    return 0;
+                    return -1;
             }
-            else
+            catch
+            {
                 return -1;
+            }
         }
 
         private string GetTestFileContent()
         {
-            string content = "0.000000 ";
+            string content = "1.000000 ";
             for (int i = 0; i < lengths.Count; i++)
-                content += string.Format("{0}: {1} ", i, lengths[i]);
+                content += string.Format("{0}: {1} ", i+1, lengths[i]);
+            content += "\r\n -1.000000 ";
+            for (int i = 0; i < lengths.Count; i++)
+                content += string.Format("{0}: {1} ", i + 1, lengths[i]);
             return content;
         }
 
