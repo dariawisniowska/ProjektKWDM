@@ -28,10 +28,9 @@ namespace EyeStation.VesselsLengthFilter
             branchAndEndPoints = new List<Point>();
         }
 
-        public void SetInput(byte[][] input)
+        public void SetInput(string filePath)
         {
-            string fileName = string.Format("temporary\\{0}.jpg", Guid.NewGuid().ToString());
-            BitmapWriter.Save(input, fileName);
+            string fileName = string.Format("{0}", filePath);
 
             sitk.Image inputImage = ImageFileReader.ReadImage(fileName);
             sitk.Image outputImage = BinaryThinningImageFilter.BinaryThinning(inputImage);
@@ -116,36 +115,39 @@ namespace EyeStation.VesselsLengthFilter
 
                 foreach (Point startNeighbor in startNeighbors)
                 {
-                    if (binaryBitmap.GetPixel(startNeighbor.X, startNeighbor.Y) == Color.FromArgb(255, 255, 255))
-                    {
-                        Point previousPoint = new Point();
-                        Point currentPoint = new Point(startNeighbor.X, startNeighbor.Y);
-                        List<Point> visitedPoints = new List<Point>() { startPoint, currentPoint };
-                        int length = visitedPoints.Count;
-
-                        while (previousPoint != currentPoint && !(branchAndEndPoints.Any(point => point == currentPoint)))
+                    if (startNeighbor.Y<binaryBitmap.Height && startNeighbor.X<binaryBitmap.Width)
                         {
-                            previousPoint = currentPoint;
+                        if (binaryBitmap.GetPixel(startNeighbor.X, startNeighbor.Y) == Color.FromArgb(255, 255, 255))
+                        {
+                            Point previousPoint = new Point();
+                            Point currentPoint = new Point(startNeighbor.X, startNeighbor.Y);
+                            List<Point> visitedPoints = new List<Point>() { startPoint, currentPoint };
+                            int length = visitedPoints.Count;
 
-                            List<Point> currentNeighbors = new List<Point>(){
+                            while (previousPoint != currentPoint && !(branchAndEndPoints.Any(point => point == currentPoint)))
+                            {
+                                previousPoint = currentPoint;
+
+                                List<Point> currentNeighbors = new List<Point>(){
                                 new Point(currentPoint.X, currentPoint.Y - 1), new Point(currentPoint.X - 1, currentPoint.Y), new Point(currentPoint.X, currentPoint.Y + 1),
                                 new Point(currentPoint.X + 1, currentPoint.Y), new Point(currentPoint.X - 1, currentPoint.Y - 1), new Point(currentPoint.X - 1, currentPoint.Y + 1),
                                 new Point(currentPoint.X + 1, currentPoint.Y + 1), new Point(currentPoint.X + 1, currentPoint.Y - 1) };
 
-                            foreach (Point currentNeighbor in currentNeighbors)
-                            {
-                                if (binaryBitmap.GetPixel(currentNeighbor.X, currentNeighbor.Y) == Color.FromArgb(255, 255, 255) && !visitedPoints.Any(point => point == currentNeighbor))
+                                foreach (Point currentNeighbor in currentNeighbors)
                                 {
-                                    length++;
-                                    currentPoint = currentNeighbor;
-                                    visitedPoints.Add(currentPoint);
+                                    if (binaryBitmap.GetPixel(currentNeighbor.X, currentNeighbor.Y) == Color.FromArgb(255, 255, 255) && !visitedPoints.Any(point => point == currentNeighbor))
+                                    {
+                                        length++;
+                                        currentPoint = currentNeighbor;
+                                        visitedPoints.Add(currentPoint);
 
-                                    //Analizowany jest tylko pierwszy punkt sąsiadujący nalżący do ścieżki
-                                    break;
+                                        //Analizowany jest tylko pierwszy punkt sąsiadujący nalżący do ścieżki
+                                        break;
+                                    }
                                 }
                             }
+                            pointPairs.Add(new Tuple<Point, Point, int>(startPoint, currentPoint, length));
                         }
-                        pointPairs.Add(new Tuple<Point, Point, int>(startPoint, currentPoint, length));
                     }
                 }
             }

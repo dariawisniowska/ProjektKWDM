@@ -694,6 +694,14 @@ namespace EyeStation
                     ImageBrush ibMask = new ImageBrush();
                     ibMask.ImageSource = this.maskImage;
                     cnvMask.Background = ibMask;
+                    Study study = (Study)lvStudy.SelectedItems[0];
+                    saveImagesToPng(study.FilePath + ".png");
+                    cnvMaskAndImage.Children.Clear();
+                    vesselMeasurements.SetInput(study.FilePath+"-2.png");
+                    Bitmap result2 = vesselMeasurements.Calculate();
+                    ImageBrush ibMaskAndImage = new ImageBrush();
+                    ibMaskAndImage.ImageSource = BitmapWriter.Bitmap2BitmapImage(result2);
+                    cnvMaskAndImage.Background = ibMaskAndImage;
                 }
             }
         }
@@ -917,12 +925,13 @@ namespace EyeStation
             var result = BitmapWriter.GetBitmap(maskInBytes);
             ImageBrush ibMask = new ImageBrush();
             this.maskImage = BitmapWriter.Bitmap2BitmapImage(result);
-            ibMask.ImageSource = this.maskImage;
+            Study study = (Study)lvStudy.SelectedItems[0];
+            ibMask.ImageSource = new BitmapImage(study.SegmentationImageSource.UriSource);
             cnvMask.Background = ibMask;
+            this.maskImage = new BitmapImage(study.SegmentationImageSource.UriSource);
 
             //END TEMPORARTY
-
-            vesselMeasurements.SetInput(vesselSegmentator.Result);
+            vesselMeasurements.SetInput(study.SegmentationName+".jpg");
             Bitmap result2 = vesselMeasurements.Calculate();
             ImageBrush ibMaskAndImage = new ImageBrush();
             ibMaskAndImage.ImageSource = BitmapWriter.Bitmap2BitmapImage(result2);
