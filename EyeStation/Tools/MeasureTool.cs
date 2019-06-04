@@ -52,7 +52,7 @@ namespace EyeStation.Tools
         {
             int pointCount = measurePoints.Count;
             TextBlock textBlock = MeasureTool.createTextBox(TextBlockColor.Blue);
-            textBlock.Text = " " + Math.Round(length) + "px ";
+            textBlock.Text = " " + Math.Round(length/275) + "mm ";
             Canvas.SetLeft(textBlock, measurePoints[pointCount - 1].X);
             Canvas.SetTop(textBlock, measurePoints[pointCount - 1].Y);
 

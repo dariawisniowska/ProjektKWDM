@@ -690,18 +690,10 @@ namespace EyeStation
             {
                 if (csd.IsNewMask && csd.NewMask != null)
                 {
-                    this.maskImage = BitmapWriter.Bitmap2BitmapImage(csd.NewMask);
                     ImageBrush ibMask = new ImageBrush();
-                    ibMask.ImageSource = this.maskImage;
+                    ibMask.ImageSource = BitmapWriter.Bitmap2BitmapImage(csd.NewMask);
                     cnvMask.Background = ibMask;
-                    Study study = (Study)lvStudy.SelectedItems[0];
-                    saveImagesToPng(study.FilePath + ".png");
-                    cnvMaskAndImage.Children.Clear();
-                    vesselMeasurements.SetInput(study.FilePath+"-2.png");
-                    Bitmap result2 = vesselMeasurements.Calculate();
-                    ImageBrush ibMaskAndImage = new ImageBrush();
-                    ibMaskAndImage.ImageSource = BitmapWriter.Bitmap2BitmapImage(result2);
-                    cnvMaskAndImage.Background = ibMaskAndImage;
+                    cnvMask.Focus();                                                        
                 }
             }
         }
@@ -712,13 +704,24 @@ namespace EyeStation
             /* 
              * Okno z informacją o podejrzeniu choroby
              */
+            vesselMeasurements = new VesselMeasurements();
+            Study study = (Study)lvStudy.SelectedItems[0];
+            cnvMaskAndImage.Children.Clear();
+            saveImagesToPng(study.FilePath + ".png");
+            vesselMeasurements.SetInput(study.FilePath + "-2.png");
+            Bitmap result2 = vesselMeasurements.Calculate();
+            ImageBrush ibMaskAndImage = new ImageBrush();
+            ibMaskAndImage.ImageSource = BitmapWriter.Bitmap2BitmapImage(result2);
+            cnvMaskAndImage.Background = ibMaskAndImage;
+
+
             uncheckedAll();
             string result = "Nie istnieje podejrzenie retinopatii cukrzycowej ani nadciśnieniowej.";
             EyeStation.VesselAnalysisFilter.VesselAnaylis vesselAnalysis = new EyeStation.VesselAnalysisFilter.VesselAnaylis(vesselMeasurements.lengths);
             int result_code = vesselAnalysis.Classify();
             if (result_code != -1)
             {
-                if (result_code == 1)
+                if (result_code == 1 || result_code == 0)
                     result = "Istnieje podejrzenie retinopatii cukrzycowej.";
                 if (result_code == 2)
                     result = "Istnieje podejrzenie retinopatii nadciśnieniowej.";

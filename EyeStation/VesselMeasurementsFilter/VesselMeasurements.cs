@@ -91,7 +91,7 @@ namespace EyeStation.VesselsLengthFilter
 
             //Naniesienie wyznaczonych zakończeń oraz rozwidleń
             graphics = Graphics.FromImage(originalBitmap);
-            int width = 2, height = 2;
+            int width = (int)(originalBitmap.Width*0.01), height = (int)(originalBitmap.Height*0.01);
             foreach (Point point in endPoints)
                 graphics.DrawEllipse(new Pen(Brushes.Green), point.X - width, point.Y - height, 2 * width, 2 * height);
             foreach (Point point in branchPoints)
@@ -168,7 +168,7 @@ namespace EyeStation.VesselsLengthFilter
             {
                 float x = (pairPair.Item1.X + pairPair.Item2.X) / 2;
                 float y = (pairPair.Item1.Y + pairPair.Item2.Y) / 2;
-                graphics.DrawString(pairPair.Item3.ToString(), new Font("Tahoma", 6), Brushes.Red, x - 6, y - 6);
+                //graphics.DrawString(pairPair.Item3.ToString(), new Font("Tahoma", 6), Brushes.Red, x - 6, y - 6);
 
                 lengths.Add(pairPair.Item3);
             }
