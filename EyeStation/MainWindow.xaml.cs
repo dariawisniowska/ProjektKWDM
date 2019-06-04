@@ -721,7 +721,7 @@ namespace EyeStation
             int result_code = vesselAnalysis.Classify();
             if (result_code != -1)
             {
-                if (result_code == 1 || result_code == 0)
+                if (result_code == 1)
                     result = "Istnieje podejrzenie retinopatii cukrzycowej.";
                 if (result_code == 2)
                     result = "Istnieje podejrzenie retinopatii nadciśnieniowej.";
@@ -750,6 +750,14 @@ namespace EyeStation
                     simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie opisu zakończone powodzeniem.");
                     lvStudy.ItemsSource = serwer.GetStudies();
                     lvStudy.SelectedIndex = index;
+                    vesselMeasurements = new VesselMeasurements();
+                    cnvMaskAndImage.Children.Clear();
+                    saveImagesToPng(study.FilePath + ".png");
+                    vesselMeasurements.SetInput(study.FilePath + "-2.png");
+                    Bitmap result2 = vesselMeasurements.Calculate();
+                    ImageBrush ibMaskAndImage = new ImageBrush();
+                    ibMaskAndImage.ImageSource = BitmapWriter.Bitmap2BitmapImage(result2);
+                    cnvMaskAndImage.Background = ibMaskAndImage;
                 }
                 else
                     simpleDialog = new SimpleDialog("Zmiana opisu", "Edytowanie opisu nie powiodło się.");
