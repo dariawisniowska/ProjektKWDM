@@ -30,16 +30,33 @@ namespace EyeStation.VesselAnalysisFilter
                 {
                     var path = Environment.CurrentDirectory.Remove(Environment.CurrentDirectory.Length - 20, 20);
                     path = path + "RethinopathyAnalysisModule\\bin\\Debug\\";
-                    SaveTestFile(path);
                     var DvCsvm = new C_SVC(System.IO.Path.Combine(path, DvC_MODEL_FILE));
                     var DvHsvm = new C_SVC(System.IO.Path.Combine(path, DvH_MODEL_FILE));
                     var HvCsvm = new C_SVC(System.IO.Path.Combine(path, HvC_MODEL_FILE));
-                    var prob = ProblemHelper.ReadProblem(System.IO.Path.Combine(path, TEST_FILE));
-                    DvCsvm.Predict(prob.x[0]);
-                    if (path == "")
-                        return 1;
+
+                    svm_node[] x = new svm_node[lengths.Count];
+                    for (int j = 0; j < lengths.Count; j++) 
+                    {
+                        x[j] = new svm_node() { index = j, value = lengths[j] };
+                    }
+                    double DvCresult = DvCsvm.Predict(x);
+                    double DvHresult = DvCsvm.Predict(x);
+                    double HvCresult = DvCsvm.Predict(x);
+                    
+                    if(DvCresult==1)
+                    {
+                        if (DvHresult == 1)
+                            return 1;
+                    }
                     else
-                        return 0;
+                    {
+                        if (HvCresult==-1)
+                            return 0;
+                        else
+                            if (DvHresult == -1)
+                                return 2;
+                    }
+                    return -1;
                 }
                 else
                     return -1;
@@ -50,23 +67,5 @@ namespace EyeStation.VesselAnalysisFilter
             }
         }
 
-        private string GetTestFileContent()
-        {
-            string content = "1.000000 ";
-            for (int i = 0; i < lengths.Count; i++)
-                content += string.Format("{0}: {1} ", i+1, lengths[i]);
-            content += "\r\n -1.000000 ";
-            for (int i = 0; i < lengths.Count; i++)
-                content += string.Format("{0}: {1} ", i + 1, lengths[i]);
-            return content;
-        }
-
-        private void SaveTestFile(string path)
-        {
-            using (StreamWriter sw = new StreamWriter(System.IO.Path.Combine(path, TEST_FILE)))
-            {
-                sw.Write(GetTestFileContent());
-            }
-        }
     }
 }

@@ -214,44 +214,10 @@ namespace EyeStation.PACSDAO
 
                     }
                 }
-                if (dataValues["(0020,000d)"].Substring(0,1)=="E" && first_exp==true)
-                {//OBRAZ SEGMENTACJI
-                    gdcm.Reader dataReader2 = new gdcm.Reader();
-                    dataReader2.SetFileName(plik);
-
-                    if (!dataReader2.Read()) { }
-
-                    gdcm.File file2 = dataReader2.GetFile();
-
-                    // przeczytaj pixele
-                    gdcm.PixmapReader reader2 = new gdcm.PixmapReader();
-                    string temp = plik;
-                    if (plik.Substring(plik.Length - 4, 4) != ".dcm")
-                        temp = pliki[1] + ".dcm";
-
-                    reader2.SetFileName(plik);
-                    if (!reader2.Read()) { }
-
-                    segmentation_name = String.Format("{0}", plik.Substring(0, plik.Length - 4));
-                    first_exp = false;
-                }              
-                else
+                if (dataValues.Count > 0)
                 {
-                    if (first_original == true)
-                    {
-                        // przeczytaj pixele
-                        gdcm.PixmapReader reader = new gdcm.PixmapReader();
-                        string temp = plik;
-                        if (plik.Substring(plik.Length - 4, 4) != ".dcm")
-                            temp = plik + ".dcm";
-                        reader.SetFileName(plik);
-                        if (!reader.Read()) { }
-                        name = String.Format("{0}", plik.Substring(0, plik.Length - 4));
-                        Datas.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)).Replace("\\", "\\\\"), dataValues);
-                        first_original = false;
-                    }
-                    else
-                    {
+                    if (dataValues["(0020,000d)"].Substring(0, 1) == "E" && first_exp == true)
+                    {//OBRAZ SEGMENTACJI
                         gdcm.Reader dataReader2 = new gdcm.Reader();
                         dataReader2.SetFileName(plik);
 
@@ -271,14 +237,45 @@ namespace EyeStation.PACSDAO
                         segmentation_name = String.Format("{0}", plik.Substring(0, plik.Length - 4));
                         first_exp = false;
                     }
+                    else
+                    {
+                        if (first_original == true)
+                        {
+                            // przeczytaj pixele
+                            gdcm.PixmapReader reader = new gdcm.PixmapReader();
+                            string temp = plik;
+                            if (plik.Substring(plik.Length - 4, 4) != ".dcm")
+                                temp = plik + ".dcm";
+                            reader.SetFileName(plik);
+                            if (!reader.Read()) { }
+                            name = String.Format("{0}", plik.Substring(0, plik.Length - 4));
+                            Datas.Add(String.Format("{0}", plik.Substring(0, plik.Length - 4)).Replace("\\", "\\\\"), dataValues);
+                            first_original = false;
+                        }
+                        else
+                        {
+                            gdcm.Reader dataReader2 = new gdcm.Reader();
+                            dataReader2.SetFileName(plik);
+
+                            if (!dataReader2.Read()) { }
+
+                            gdcm.File file2 = dataReader2.GetFile();
+
+                            // przeczytaj pixele
+                            gdcm.PixmapReader reader2 = new gdcm.PixmapReader();
+                            string temp = plik;
+                            if (plik.Substring(plik.Length - 4, 4) != ".dcm")
+                                temp = pliki[1] + ".dcm";
+
+                            reader2.SetFileName(plik);
+                            if (!reader2.Read()) { }
+
+                            segmentation_name = String.Format("{0}", plik.Substring(0, plik.Length - 4));
+                            first_exp = false;
+                        }
+                    }
                 }
-
-            }         
-              
-
-           
-
-
+            }     
         }
 
         private gdcm.DataSetArrayType PatientQuery()
